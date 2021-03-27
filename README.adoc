@@ -1,0 +1,7 @@
+# COVID-19 vaccinations done in the UK
+
+```
+streamlit run analyse.py
+```
+
+Go to http://localhost:8501
