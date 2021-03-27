@@ -32,7 +32,7 @@ melted_df = melted_df[melted_df.areaName == "United Kingdom"]
 melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})
 
 melted_daily_doses = melted_df.loc[(melted_df["dose"] == "firstDose") | (melted_df["dose"] == "secondDose")]
-melted_daily_doses = melted_daily_doses[~pd.isna(melted_daily_doses.vaccinations)]
+melted_daily_doses = melted_daily_doses.loc[~pd.isna(melted_daily_doses.vaccinations)]
 melted_daily_doses = melted_daily_doses.sort_values(["date"])
 
 melted_daily_doses.loc[:, "dateWeek"] = pd.to_datetime(melted_daily_doses.date).dt.strftime('%Y-%U')
@@ -97,7 +97,7 @@ percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "rig
 
 st.altair_chart(percentage_doses_chart)
 
-rolling_average_chart = (alt.Chart(melted_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
+rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
     x=alt.X("date", axis=alt.Axis(values=weekends)),
     tooltip=['rollingAverage'],
     y=alt.Y('rollingAverage', axis=alt.Axis(title='Doses')),
