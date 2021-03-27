@@ -8,8 +8,8 @@ from dateutil import parser
 population = 68134973
 alt.themes.enable('fivethirtyeight')
 
-dose1 = pd.read_csv("data_2021-Mar-26-dose1.csv")
-dose2 = pd.read_csv("data_2021-Mar-26-dose2.csv")
+dose1 = pd.read_csv("data/data_2021-Mar-26-dose1.csv")
+dose2 = pd.read_csv("data/data_2021-Mar-26-dose2.csv")
 df = pd.merge(dose1, dose2, on=["date", "areaName", "areaType", "areaCode"])
 
 df["totalByDay"] = df.newPeopleVaccinatedSecondDoseByPublishDate + df.newPeopleVaccinatedFirstDoseByPublishDate
