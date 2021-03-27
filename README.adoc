@@ -49,3 +49,10 @@ If everything has worked, you should see something like the screenshot below:
 .Screenshot of Covid Vaccinations app
 image::screenshot.png[title="Screenshot of Covid Vaccinations app"]
 
+== The Data
+
+The data is in the https://github.com/mneedham/covid-vaccines/tree/main/data[data] directory and was downloaded from https://coronavirus.data.gov.uk/details/vaccinations. 
+
+* The data for `People who have received 1st dose vaccinations, by report date` is saved as `data/data_<date>-dose1.csv`
+* The data for `People who have received 2nd dose vaccinations, by report date` is saved as `data/data_<date>-dose2.csv`
+
