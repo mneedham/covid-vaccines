@@ -34,4 +34,17 @@ Once you have the dependencies install, you can launch the Streamlit app using t
 streamlit run analyse.py
 ```
 
-Now, navigate to to http://localhost:8501
+You should see output similar to the following:
+
+```
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://192.168.86.26:8501
+```
+
+Now, navigate to http://localhost:8501 to view the app.
+If everything has worked, you should see something like the screenshot below:
+
+
+
