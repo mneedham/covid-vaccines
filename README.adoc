@@ -47,7 +47,7 @@ Now, navigate to http://localhost:8501 to view the app.
 If everything has worked, you should see something like the screenshot below:
 
 .Screenshot of Covid Vaccinations app
-image::screenshot.png[title="Screenshot of Covid Vaccinations app"]
+image::screenshots/screenshot.png[title="Screenshot of Covid Vaccinations app"]
 
 == The Data
 
