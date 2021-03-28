@@ -2,6 +2,8 @@
 
 This is a https://streamlit.io/[Streamlit^] application that makes it easier to visualise the number of COVID-19 vaccinations done in the UK across different dimensions.
 
+It is deployed at https://share.streamlit.io/mneedham/covid-vaccines/main/analyse.py
+
 == Getting Started
 
 If you want to try it out, you'll need to first clone the repository:
