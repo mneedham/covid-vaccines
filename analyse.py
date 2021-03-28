@@ -144,7 +144,7 @@ st.write("These charts show the number of vaccine doses given, grouped by week n
 weekly_left_column, weekly_right_column = st.beta_columns(2)
 
 with weekly_left_column: 
-    all_doses_by_week_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar(size=50).encode(
+    all_doses_by_week_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         x='dateWeek',
         y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
         tooltip=['sum(vaccinations)'],
