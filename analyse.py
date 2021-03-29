@@ -116,7 +116,7 @@ with daily_left_column:
         y=alt.Y('rollingAverage', axis=alt.Axis(title='Doses')),
         color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
         )
-    .properties(title="7-day rolling average of doses", height=500))
+    .properties(title="7-day rolling average", height=500))
 
     st.altair_chart(rolling_average_chart, use_container_width=True)
 
