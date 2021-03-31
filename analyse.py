@@ -14,7 +14,7 @@ def custom_strftime(format, t):
 population = 68134973
 alt.themes.enable('fivethirtyeight')
 
-latest_date = parser.parse("2021-03-30")
+latest_date = parser.parse("2021-03-31")
 
 dose1 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose1.csv")
 dose2 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose2.csv")
@@ -106,6 +106,7 @@ with daily_left_column:
         x=alt.X('date', axis=alt.Axis(values=weekends)),
         tooltip=['sum(vaccinations)', 'date'],
         y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
+        order=alt.Order('dose',sort='ascending'),
         color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
     ).properties( title='All doses by day', height=500)
     st.altair_chart(all_doses_chart, use_container_width=True)
@@ -123,10 +124,11 @@ with daily_left_column:
 with daily_right_column:
     weekday_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         x=alt.X('dayOfWeek', sort=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]),
-        tooltip=['sum(vaccinations)', 'dayOfWeek'],
-        y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
+        tooltip=['mean(vaccinations)', 'dayOfWeek'],
+        y=alt.Y('mean(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
+        order=alt.Order('dose',sort='ascending'),
         color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
-    ).properties( title='Total doses by day of week', height=500)
+    ).properties( title='Average doses by day of week', height=500)
     st.altair_chart(weekday_doses_chart, use_container_width=True)    
 
     percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
@@ -148,6 +150,7 @@ with weekly_left_column:
         x='dateWeek',
         y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
         tooltip=['sum(vaccinations)'],
+        order=alt.Order('dose',sort='ascending'),
         color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
     ).properties(title='All doses by week', height=500)
     st.altair_chart(all_doses_by_week_chart, use_container_width=True)
