@@ -50,6 +50,7 @@ melted_daily_doses.loc[melted_daily_doses.dose == "firstDose", "rollingAverage"]
 melted_daily_doses.loc[melted_daily_doses.dose == "secondDose", "rollingAverage"] = melted_daily_doses.loc[melted_daily_doses.dose == "secondDose"]["vaccinations"].rolling(7).mean()
 melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "rollingAverage"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].rolling(7).mean()
 melted_daily_doses.loc[:, "dayOfWeek"] = melted_daily_doses.date.apply(lambda item: parser.parse(item).strftime("%A"))
+melted_daily_doses.loc[:, "dayOfWeekIndex"] = melted_daily_doses.date.apply(lambda item: parser.parse(item).strftime("%w"))
 
 melted_first_second_daily_doses = melted_daily_doses.loc[(melted_daily_doses.dose.isin(["firstDose", "secondDose"]))]
 
@@ -98,19 +99,20 @@ dose2.loc[:, "cumulativeDoses"] = dose2["cumPeopleVaccinatedSecondDoseByPublishD
 st.header("Daily Vaccine Doses")
 st.write("Daily figures are only available from 11th January 2021")
 
-daily_left_column, daily_right_column = st.beta_columns(2)
 weekends = [value for value in melted_daily_doses.date.values if parser.parse(value).weekday() == 0]
 
-with daily_left_column:    
-    all_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
-        x=alt.X('date', axis=alt.Axis(values=weekends)),
-        tooltip=['sum(vaccinations)', 'date'],
-        y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
-        order=alt.Order('dose',sort='ascending'),
-        color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
-    ).properties( title='All doses by day', height=500)
-    st.altair_chart(all_doses_chart, use_container_width=True)
+all_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+    x=alt.X('date', axis=alt.Axis(values=weekends)),
+    tooltip=['sum(vaccinations)', 'date'],
+    y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
+    order=alt.Order('dose',sort='ascending'),
+    color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
+).properties( title='All doses by day', height=500)
+st.altair_chart(all_doses_chart, use_container_width=True)
 
+daily_left_column, daily_right_column = st.beta_columns(2)
+
+with daily_left_column:    
     rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
         x=alt.X("date", axis=alt.Axis(values=weekends)),
         tooltip=['rollingAverage'],
@@ -122,15 +124,6 @@ with daily_left_column:
     st.altair_chart(rolling_average_chart, use_container_width=True)
 
 with daily_right_column:
-    weekday_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
-        x=alt.X('dayOfWeek', sort=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]),
-        tooltip=['mean(vaccinations)', 'dayOfWeek'],
-        y=alt.Y('mean(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
-        order=alt.Order('dose',sort='ascending'),
-        color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
-    ).properties( title='Average doses by day of week', height=500)
-    st.altair_chart(weekday_doses_chart, use_container_width=True)    
-
     percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
         x=alt.X("date", axis=alt.Axis(values=weekends)),
         tooltip=['mean(percentageFirstDose)'],
@@ -155,6 +148,17 @@ with weekly_left_column:
     ).properties(title='All doses by week', height=500)
     st.altair_chart(all_doses_by_week_chart, use_container_width=True)
 
+    all_df["dateWeek"] = pd.to_datetime(all_df.date).dt.strftime('%Y-%U')
+    percentage_doses_by_week_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
+        .mark_line(point=True)
+        .encode(
+            x="dateWeek",
+            tooltip=['mean(percentageFirstDose)'],
+            y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
+        .properties(height=500,title="% of first doses by week"))
+
+    st.altair_chart(percentage_doses_by_week_chart, use_container_width=True)
+
 with weekly_right_column:
     all_doses_by_week_chart2 = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         x=alt.X('dose', axis=alt.Axis(labels=False, ticks=False), title=None),
@@ -165,14 +169,19 @@ with weekly_right_column:
     ).properties(title='All doses by week')
     st.altair_chart(all_doses_by_week_chart2)
 
-all_df["dateWeek"] = pd.to_datetime(all_df.date).dt.strftime('%Y-%U')
-percentage_doses_by_week_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
-    .mark_line(point=True)
-    .encode(
-        x="dateWeek",
-        tooltip=['mean(percentageFirstDose)'],
-        y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
-    .properties(height=500,title="% of first doses by week"))
-
-st.altair_chart(percentage_doses_by_week_chart, use_container_width=True)
+    weekday_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_area().encode(
+        x='dateWeek',
+        tooltip=['sum(vaccinations)', 'dayOfWeek', 'date'],
+        y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),  
+        order=alt.Order('dayOfWeekIndex',sort='ascending'),          
+        color=alt.Color('dayOfWeek', 
+            legend=alt.Legend(orient='bottom'), 
+            sort=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            scale=alt.Scale(
+                domain=[ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], 
+                range= ['#FFFF00', '#FFA500', '#808000', '#8B008B', '#7CFC00', '#FF69B4', '#00FFFF' ]
+            )
+        )
+    ).properties( title='Doses by day of week', height=500)
+    st.altair_chart(weekday_doses_chart, use_container_width=True)    
 
