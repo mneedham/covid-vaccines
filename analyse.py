@@ -25,6 +25,7 @@ df.loc[:, "percentageFirstDose"] = 100.0* df.newPeopleVaccinatedFirstDoseByPubli
 
 cols = ["date", "newPeopleVaccinatedSecondDoseByPublishDate", "newPeopleVaccinatedFirstDoseByPublishDate", "totalByDay", "percentageFirstDose"]
 all_df = df[df.areaName == "United Kingdom"]
+all_df = all_df.loc[~pd.isna(all_df.totalByDay)]
 
 first_dose = all_df['cumPeopleVaccinatedFirstDoseByPublishDate'].max()
 second_dose = all_df['cumPeopleVaccinatedSecondDoseByPublishDate'].max()
@@ -76,10 +77,10 @@ st.write("This chart shows the total number of doses done at the end of each wee
 
 cumulative_first_doses_chart = alt.Chart(melted_cumulative_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
     # x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending', format=("%b %d"))),
-    x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending')),
+    x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending'), scale=alt.Scale(padding=0)),
     tooltip=['max(vaccinations)'],
     y=alt.Y('max(vaccinations)', axis=alt.Axis(title='Vaccinations')),
-    color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
+    color=alt.Color('dose', legend=alt.Legend(orient='bottom')),
 ).properties(title='Cumulative doses', height=500)
 st.altair_chart(cumulative_first_doses_chart, use_container_width=True)
 
@@ -125,7 +126,7 @@ with daily_left_column:
 
 with daily_right_column:
     percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
-        x=alt.X("date", axis=alt.Axis(values=weekends)),
+        x=alt.X("date", axis=alt.Axis(values=weekends), scale=alt.Scale(padding=0)),
         tooltip=['mean(percentageFirstDose)'],
         y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
         .properties(title="% of first doses by day", height=500))
@@ -152,7 +153,7 @@ with weekly_left_column:
     percentage_doses_by_week_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
         .mark_line(point=True)
         .encode(
-            x="dateWeek",
+            x=alt.X("dateWeek", scale=alt.Scale(padding=0)),
             tooltip=['mean(percentageFirstDose)'],
             y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
         .properties(height=500,title="% of first doses by week"))
@@ -170,7 +171,7 @@ with weekly_right_column:
     st.altair_chart(all_doses_by_week_chart2)
 
     weekday_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_area().encode(
-        x='dateWeek',
+        x=alt.X('dateWeek', scale=alt.Scale(padding=0)),
         tooltip=['sum(vaccinations)', 'dayOfWeek', 'date'],
         y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),  
         order=alt.Order('dayOfWeekIndex',sort='ascending'),          
