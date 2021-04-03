@@ -177,10 +177,10 @@ with weekly_right_column:
         order=alt.Order('dayOfWeekIndex',sort='ascending'),          
         color=alt.Color('dayOfWeek', 
             legend=alt.Legend(orient='bottom'), 
-            sort=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            sort=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
             scale=alt.Scale(
-                domain=[ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], 
-                range= ['#FFFF00', '#FFA500', '#808000', '#8B008B', '#7CFC00', '#FF69B4', '#00FFFF' ]
+                domain=[ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], 
+                range= ['#2E86C1', '#117864', '#76448A', '#F1C40F', '#E74C3C', '#FF69B4', '#00FFFF' ]
             )
         )
     ).properties( title='Doses by day of week', height=500)
