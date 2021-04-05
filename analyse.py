@@ -14,7 +14,7 @@ def custom_strftime(format, t):
 population = 68134973
 alt.themes.enable('fivethirtyeight')
 
-latest_date = parser.parse("2021-04-04")
+latest_date = parser.parse("2021-04-05")
 
 dose1 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose1.csv")
 dose2 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose2.csv")
