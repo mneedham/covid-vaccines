@@ -161,14 +161,14 @@ with weekly_left_column:
     st.altair_chart(percentage_doses_by_week_chart, use_container_width=True)
 
 with weekly_right_column:
-    all_doses_by_week_chart2 = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
-        x=alt.X('dose', axis=alt.Axis(labels=False, ticks=False), title=None),
+    all_doses_by_week_chart2 = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
+        x=alt.X('dateWeek', axis=alt.Axis(labels=False, ticks=False), title=None),
         y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
-        tooltip=['sum(vaccinations)'],
-        column='dateWeek',
+        tooltip=['sum(vaccinations)', 'dose', 'dateWeek'],
+        # column='dateWeek',
         color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
-    ).properties(title='All doses by week')
-    st.altair_chart(all_doses_by_week_chart2)
+    ).properties(title='All doses by week', height=500)
+    st.altair_chart(all_doses_by_week_chart2, use_container_width=True)
 
     weekday_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_area().encode(
         x=alt.X('dateWeek', scale=alt.Scale(padding=0)),
