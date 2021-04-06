@@ -162,7 +162,7 @@ with weekly_left_column:
 
 with weekly_right_column:
     all_doses_by_week_chart2 = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
-        x=alt.X('dateWeek', axis=alt.Axis(labels=False, ticks=False), title=None),
+        x=alt.X('dateWeek', scale=alt.Scale(padding=0)),
         y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
         tooltip=['sum(vaccinations)', 'dose', 'dateWeek'],
         # column='dateWeek',
