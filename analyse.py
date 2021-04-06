@@ -4,12 +4,7 @@ import altair as alt
 import numpy as np
 from datetime import datetime, timedelta
 from dateutil import parser
-
-def suffix(d):
-    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
-
-def custom_strftime(format, t):
-    return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
+from utils import suffix, custom_strftime
 
 population = 68134973
 alt.themes.enable('fivethirtyeight')
@@ -68,7 +63,7 @@ summary_df.set_index('Description', inplace=True)
 st.set_page_config(layout="wide")
 st.title("Coronavirus Vaccines in the UK")
 st.write(f"As of {custom_strftime('{S} %B %Y', latest_date)}")
-st.write("This app contains charts showing how the Coronavirus vaccination program is going in the UK. It's based on data from https://coronavirus.data.gov.uk/")
+st.markdown("This app contains charts showing how the Coronavirus vaccination program is going in the UK. It's based on data from [coronavirus.data.gov.uk/details/vaccinations](https://coronavirus.data.gov.uk/details/vaccinations)")
 st.header("Overview")
 st.table(summary_df)
 
