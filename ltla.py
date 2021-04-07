@@ -37,10 +37,9 @@ st.write(f"As of {custom_strftime('{S} %B %Y', latest_date)}")
 st.markdown("This app contains charts showing how the Coronavirus vaccination program is going in the UK by Local Tier Local Authority, using the weekly data published at [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/)")
 
 st.header("% of people vaccinated by age group")
-st.dataframe(combined)
+st.dataframe(combined.drop(["LTLA Code"], axis=1))
 
 st.header("% of people vaccinated by local area")
-option = st.selectbox('Select area:',
-                       combined["LTLA Name"].values)
+option = st.selectbox('Select local area:', combined["LTLA Name"].values)
 
 st.table(combined.loc[combined["LTLA Name"] == option].drop(["LTLA Name", "LTLA Code"], axis=1))
