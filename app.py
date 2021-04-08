@@ -196,12 +196,11 @@ def ltla(latest_date):
     melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})
     melted_local_area.reset_index(level=0, inplace=True)
 
-    weekday_doses_chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+    weekday_doses_chart = alt.Chart(melted_local_area).mark_bar().encode(
         y=alt.Y('Age', sort=["index"]),
-        x=alt.X('Percentage', axis=alt.Axis(format='.0%'), scale=alt.Scale(domain=[0, 1])),
-    
+        x=alt.X('Percentage', axis=alt.Axis(format='.0%'), scale=alt.Scale(domain=[0, 1])),    
         tooltip=['Percentage'] 
-    ).properties( title=f"% of people vaccinated by age group in {option}", height=500)
+    ).properties( title=f"Vaccinations by age group in {option}")
     st.altair_chart(weekday_doses_chart, use_container_width=True)  
 
 @st.cache 
