@@ -5,7 +5,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from dateutil import parser
 from utils import suffix, custom_strftime
-from ltla import compute_vaccination_rates
+from ltla import compute_vaccination_rates, total_vaccination_rates
 
 def cumulative(latest_date):
     all_df = create_vaccines_dataframe(latest_date)
@@ -183,12 +183,24 @@ def ltla(latest_date):
     st.markdown("This app contains charts showing how the Coronavirus vaccination program is going in the UK by Local Tier Local Authority, using the weekly data published at [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/)")
     
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_date.strftime('%-d-%B-%Y')}.xlsx"
-    combined = compute_vaccination_rates(spreadsheet)
 
-    st.header("By age group")
-    st.dataframe(combined.drop(["LTLA Code"], axis=1))
+    st.header("By age group")       
+    total = total_vaccination_rates(spreadsheet)
+    total.loc[:, "Percentage"] = total.loc[:, "Percentage"] * 100
+    total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
+    total.loc[:, "Vaccinations"] = total["Vaccinations"].map('{:,d}'.format)
+    st.table(total.drop(["Age"], axis=1))
+
+    total_doses_chart = alt.Chart(total, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+        y=alt.Y('Age', sort=["index"]),
+        x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),    
+        tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
+    ).properties()
+    st.altair_chart(total_doses_chart, use_container_width=True)    
 
     st.header("By local area")
+    combined = compute_vaccination_rates(spreadsheet)
+
     option = st.selectbox('Select local area:', combined["LTLA Name"].values)
 
     local_area = combined.loc[combined["LTLA Name"] == option].drop(["LTLA Name", "LTLA Code"], axis=1)
