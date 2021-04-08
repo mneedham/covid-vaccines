@@ -200,7 +200,7 @@ def ltla(latest_date):
         y=alt.Y('Age', sort=["index"]),
         x=alt.X('Percentage', axis=alt.Axis(format='.0%'), scale=alt.Scale(domain=[0, 1])),    
         tooltip=['Percentage'] 
-    ).properties( title=f"Vaccinations by age group in {option}")
+    ).properties()
     st.altair_chart(weekday_doses_chart, use_container_width=True)  
 
 @st.cache 
