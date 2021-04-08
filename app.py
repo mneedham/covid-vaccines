@@ -191,7 +191,18 @@ def ltla(latest_date):
     st.header("% of people vaccinated by local area")
     option = st.selectbox('Select local area:', combined["LTLA Name"].values)
 
-    st.table(combined.loc[combined["LTLA Name"] == option].drop(["LTLA Name", "LTLA Code"], axis=1))
+    local_area = combined.loc[combined["LTLA Name"] == option].drop(["LTLA Name", "LTLA Code"], axis=1)
+    melted_local_area = local_area.melt(value_vars=local_area.columns)
+    melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})
+    melted_local_area.reset_index(level=0, inplace=True)
+
+    weekday_doses_chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+        y=alt.Y('Age', sort=["index"]),
+        x=alt.X('Percentage', axis=alt.Axis(format='.0%'), scale=alt.Scale(domain=[0, 1])),
+    
+        tooltip=['Percentage'] 
+    ).properties( title=f"% of people vaccinated by age group in {option}", height=500)
+    st.altair_chart(weekday_doses_chart, use_container_width=True)  
 
 @st.cache 
 def create_vaccines_dataframe(latest_date):

@@ -29,7 +29,7 @@ def main():
     st.set_page_config(layout="wide")
 
     latest_date = parser.parse("2021-04-01")
-    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_date.strftime('%-d-%B-%Y')}.xlsx"   
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_date.strftime('%-d-%B-%Y')}.xlsx"
 
     combined = compute_vaccination_rates(spreadsheet)
 
