@@ -247,11 +247,12 @@ if "page" in query_params:
 
 page_keys = list(PAGES.keys())
 selection = st.sidebar.radio("Select Dashboard", page_keys, index=page_keys.index(default))
-if selection:
-    st.experimental_set_query_params(page=page_keys.index(selection))
 
 page = PAGES[selection]
 
 population = 68134973
 latest_date = parser.parse("2021-04-08") if selection == "Doses by Local Authority" else parser.parse("2021-04-08")
 page(latest_date)
+
+if selection:
+    st.experimental_set_query_params(page=page_keys.index(selection))
