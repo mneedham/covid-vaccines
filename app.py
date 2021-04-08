@@ -7,6 +7,8 @@ from dateutil import parser
 from utils import suffix, custom_strftime
 from ltla import compute_vaccination_rates, total_vaccination_rates
 
+pd.options.display.float_format = '{:,.f}'.format
+
 def cumulative(latest_date):
     all_df = create_vaccines_dataframe(latest_date)
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
@@ -186,15 +188,17 @@ def ltla(latest_date):
 
     st.header("By age group")       
     total = total_vaccination_rates(spreadsheet)
-    total.loc[:, "Percentage"] = total.loc[:, "Percentage"] * 100
+    # st.write(total.Population.sum())
+    total.loc[:, "%"] = (total.loc[:, "%"] * 100)
     total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
     total.loc[:, "Vaccinations"] = total["Vaccinations"].map('{:,d}'.format)
+
     st.table(total.drop(["Age"], axis=1))
 
     total_doses_chart = alt.Chart(total, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         y=alt.Y('Age', sort=["index"]),
-        x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),    
-        tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
+        x=alt.X('%', scale=alt.Scale(domain=[0, 100])),    
+        tooltip=["Age", alt.Tooltip('%', format='.2f')] 
     ).properties()
     st.altair_chart(total_doses_chart, use_container_width=True)    
 

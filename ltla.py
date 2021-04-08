@@ -35,7 +35,7 @@ def total_vaccination_rates(spreadsheet):
     population = population_dataframe(spreadsheet)
     total = pd.DataFrame({"Vaccinations": vaccinations.sum(), "Population": population.sum()})
     total.loc[:, "Age"] = total.index
-    total.loc[:, "Percentage"] = total.Vaccinations / total.Population
+    total.loc[:, "%"] = total.Vaccinations / total.Population
     return total
 
 def main():
