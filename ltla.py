@@ -28,7 +28,7 @@ def population_dataframe(spreadsheet):
 def compute_vaccination_rates(spreadsheet):
     vaccinations = vaccinations_dataframe(spreadsheet)
     population = population_dataframe(spreadsheet)
-    return vaccinations.select_dtypes(exclude='string').div(population.select_dtypes(exclude='string')).combine_first(population)[vaccinations.columns]
+    return (vaccinations.select_dtypes(exclude='string').div(population.select_dtypes(exclude='string')) * 100).combine_first(population)[vaccinations.columns]
 
 def total_vaccination_rates(spreadsheet):
     vaccinations = vaccinations_dataframe(spreadsheet)

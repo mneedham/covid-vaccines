@@ -7,7 +7,6 @@ from dateutil import parser
 from utils import suffix, custom_strftime
 from ltla import compute_vaccination_rates, total_vaccination_rates
 
-pd.options.display.float_format = '{:,.f}'.format
 
 def daily(latest_daily_date, latest_weekly_date):
     all_df = create_vaccines_dataframe(latest_daily_date).copy()
@@ -203,17 +202,19 @@ def ltla(latest_daily_date, latest_weekly_date):
     
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
 
-    st.header("By local area")
+    st.header("All local areas")
     combined = compute_vaccination_rates(spreadsheet)
+    formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
+    st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
 
+    st.header("Specific local area")
     option = st.selectbox('Select local area:', combined["LTLA Name"].values)
 
     local_area = combined.loc[combined["LTLA Name"] == option].drop(["LTLA Name", "LTLA Code"], axis=1)
     melted_local_area = local_area.melt(value_vars=local_area.columns)
-    melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})
-    melted_local_area.loc[:, "Percentage"] = melted_local_area.loc[:, "Percentage"] * 100
+    melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
     melted_local_area.reset_index(level=0, inplace=True)
-
+    
     weekday_doses_chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         y=alt.Y('Age', sort=["index"]),
         x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),    
