@@ -228,20 +228,30 @@ def create_vaccines_dataframe(latest_date):
 
 PAGES = {
     "Overview": overview,
-    "Cumulative Vaccines": cumulative,
-    "Daily Vaccines": daily,
-    "Weekly Vaccines": weekly,
-    "Doses by Local Authority": ltla
+    "Cumulative": cumulative,
+    "Daily": daily,
+    "Weekly": weekly,
+    "Local Authority": ltla
 }
 
 alt.themes.enable('fivethirtyeight')
 st.set_page_config(layout="wide")
 st.sidebar.title("UK Coronavirus Vaccines")
 
-selection = st.sidebar.radio("Select Dashboard", list(PAGES.keys()))
+default = "Overview"
+query_params = st.experimental_get_query_params()
+if "page" in query_params:
+    page_query_string = query_params["page"][0]
+    if page_query_string in PAGES.keys():
+        default = page_query_string
+
+page_keys = list(PAGES.keys())
+selection = st.sidebar.radio("Select Dashboard", page_keys, index=page_keys.index(default))
+if selection:
+    st.experimental_set_query_params(page=page_keys.index(selection))
 
 page = PAGES[selection]
 
 population = 68134973
-latest_date = parser.parse("2021-04-01") if selection == "Doses by Local Authority" else parser.parse("2021-04-08")
+latest_date = parser.parse("2021-04-08") if selection == "Doses by Local Authority" else parser.parse("2021-04-08")
 page(latest_date)
