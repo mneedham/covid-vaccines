@@ -204,7 +204,6 @@ def ltla(latest_daily_date, latest_weekly_date):
 
     st.header("All local areas")
     combined = compute_vaccination_rates(spreadsheet)
-    st.write(combined)
     formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
     st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
 
