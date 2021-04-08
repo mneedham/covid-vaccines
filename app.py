@@ -9,28 +9,8 @@ from ltla import compute_vaccination_rates, total_vaccination_rates
 
 pd.options.display.float_format = '{:,.f}'.format
 
-def cumulative(latest_date):
-    all_df = create_vaccines_dataframe(latest_date)
-    melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
-    melted_df = melted_df[melted_df.areaName == "United Kingdom"]
-    melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})
-
-    melted_cumulative_doses = melted_df.loc[(melted_df["dose"] == "firstDoseCumulative") | (melted_df["dose"] == "secondDoseCumulative"), :]
-    melted_cumulative_doses.loc[:,"dateWeek"] = pd.to_datetime(melted_cumulative_doses.date).dt.strftime('%Y-%U')
-
-    st.title("Cumulative Vaccines Administered")
-    st.header(f"As of {custom_strftime('{S} %B %Y', latest_date)}")
-    st.write("This dashboard shows the total number of doses done at the end of each week.")
-    cumulative_first_doses_chart = alt.Chart(melted_cumulative_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
-        x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending'), scale=alt.Scale(padding=0)),
-        tooltip=['max(vaccinations)'],
-        y=alt.Y('max(vaccinations)', axis=alt.Axis(title='Vaccinations')),
-        color=alt.Color('dose', legend=alt.Legend(orient='bottom')),
-    ).properties(title='Cumulative doses', height=500)
-    st.altair_chart(cumulative_first_doses_chart, use_container_width=True)
-
-def daily(latest_date):
-    all_df = create_vaccines_dataframe(latest_date).copy()
+def daily(latest_daily_date, latest_weekly_date):
+    all_df = create_vaccines_dataframe(latest_daily_date).copy()
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
     melted_df = melted_df[melted_df.areaName == "United Kingdom"]
     melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})    
@@ -55,7 +35,7 @@ def daily(latest_date):
     weekends = [value for value in melted_daily_doses.date.values if parser.parse(value).weekday() == 0]
 
     st.title("Daily Vaccines Administered")
-    st.header(f"As of {custom_strftime('{S} %B %Y', latest_date)}")
+    st.write(f"As of {custom_strftime('{S} %B %Y', latest_daily_date)}")
     st.write("This dashboard shows the total number of doses done at the end of each day. Data is only available from 11th January 2021")
     all_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         x=alt.X('date', axis=alt.Axis(values=weekends)),
@@ -71,7 +51,7 @@ def daily(latest_date):
     with daily_left_column:    
         rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
             x=alt.X("date", axis=alt.Axis(values=weekends)),
-            tooltip=['rollingAverage'],
+            tooltip=['rollingAverage', "date"],
             y=alt.Y('rollingAverage', axis=alt.Axis(title='Doses')),
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
             )
@@ -82,13 +62,13 @@ def daily(latest_date):
     with daily_right_column:
         percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
             x=alt.X("date", axis=alt.Axis(values=weekends), scale=alt.Scale(padding=0)),
-            tooltip=['mean(percentageFirstDose)'],
+            tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose"), "date"],
             y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
             .properties(title="% of first doses by day", height=500))
         st.altair_chart(percentage_doses_chart, use_container_width=True)
 
-def weekly(latest_date):
-    all_df = create_vaccines_dataframe(latest_date).copy()
+def weekly(latest_daily_date, latest_weekly_date):
+    all_df = create_vaccines_dataframe(latest_daily_date).copy()
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
     melted_df = melted_df[melted_df.areaName == "United Kingdom"]
     melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})    
@@ -113,7 +93,7 @@ def weekly(latest_date):
     weekends = [value for value in melted_daily_doses.date.values if parser.parse(value).weekday() == 0]
 
     st.title("Weekly Vaccines Administered")
-    st.header(f"As of {custom_strftime('{S} %B %Y', latest_date)}")
+    st.write(f"Using daily date as of {custom_strftime('{S} %B %Y', latest_daily_date)}")
     st.write("This dashboard shows the total number of doses done at the end of each week. Data is only available from 11th January 2021")
     weekly_left_column, weekly_right_column = st.beta_columns(2)
     with weekly_left_column: 
@@ -131,7 +111,7 @@ def weekly(latest_date):
             .mark_line(point=True)
             .encode(
                 x=alt.X("dateWeek", scale=alt.Scale(padding=0)),
-                tooltip=['mean(percentageFirstDose)'],
+                tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose"), "dateWeek"],
                 y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
             .properties(height=500,title="% of first doses by week"))
 
@@ -141,7 +121,7 @@ def weekly(latest_date):
         all_doses_by_week_chart2 = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
             x=alt.X('dateWeek', scale=alt.Scale(padding=0)),
             y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
-            tooltip=['sum(vaccinations)', 'dose', 'dateWeek'],
+            tooltip=[alt.Tooltip('sum(vaccinations)', title="# of vaccinations"), 'dose', 'dateWeek'],
             # column='dateWeek',
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
         ).properties(title='All doses by week', height=500)
@@ -163,8 +143,8 @@ def weekly(latest_date):
         ).properties( title='Doses by day of week', height=500)
         st.altair_chart(weekday_doses_chart, use_container_width=True)    
 
-def overview(latest_date):    
-    all_df = create_vaccines_dataframe(latest_date)
+def overview(latest_daily_date, latest_weekly_date):    
+    all_df = create_vaccines_dataframe(latest_daily_date)
 
     first_dose = all_df['firstDoseCumulative'].max()
     second_dose = all_df['secondDoseCumulative'].max()
@@ -176,31 +156,52 @@ def overview(latest_date):
     summary_df.set_index('Description', inplace=True)
 
     st.title("All Vaccines Administered")
-    st.header(f"As of {custom_strftime('{S} %B %Y', latest_date)}")
-    st.table(summary_df)
 
-def ltla(latest_date):
-    st.title("Vaccines Administered by Lower Tier Local Authority")
-    st.header(f"As of {custom_strftime('{S} %B %Y', latest_date)}")
-    st.markdown("This app contains charts showing how the Coronavirus vaccination program is going in the UK by Local Tier Local Authority, using the weekly data published at [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/)")
-    
-    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_date.strftime('%-d-%B-%Y')}.xlsx"
+    st.header("Overview")
+    st.write(f"Using daily data as of {custom_strftime('{S} %B %Y', latest_daily_date)}")
+    st.table(summary_df) 
 
-    st.header("By age group")       
+    melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
+    melted_df = melted_df[melted_df.areaName == "United Kingdom"]
+    melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})
+
+    melted_cumulative_doses = melted_df.loc[(melted_df["dose"] == "firstDoseCumulative") | (melted_df["dose"] == "secondDoseCumulative"), :]
+    melted_cumulative_doses.loc[:,"dateWeek"] = pd.to_datetime(melted_cumulative_doses.date).dt.strftime('%Y-%U')
+
+    st.header("Cumulative Vaccines Administered")
+    st.write(f"Using daily data as of {custom_strftime('{S} %B %Y', latest_daily_date)}")
+    st.write("This chart shows the total number of doses done at the end of each week.")
+    cumulative_first_doses_chart = alt.Chart(melted_cumulative_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
+        x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending'), scale=alt.Scale(padding=0)),
+        tooltip=['max(vaccinations)'],
+        y=alt.Y('max(vaccinations)', axis=alt.Axis(title='Vaccinations')),
+        color=alt.Color('dose', legend=alt.Legend(orient='bottom')),
+    ).properties(title='Cumulative doses', height=500)
+    st.altair_chart(cumulative_first_doses_chart, use_container_width=True)
+
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     total = total_vaccination_rates(spreadsheet)
-    # st.write(total.Population.sum())
     total.loc[:, "%"] = (total.loc[:, "%"] * 100)
     total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
     total.loc[:, "Vaccinations"] = total["Vaccinations"].map('{:,d}'.format)
 
+    st.header("By Age Group")
+    st.write(f"Using weekly data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}")
     st.table(total.drop(["Age"], axis=1))
 
     total_doses_chart = alt.Chart(total, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         y=alt.Y('Age', sort=["index"]),
         x=alt.X('%', scale=alt.Scale(domain=[0, 100])),    
         tooltip=["Age", alt.Tooltip('%', format='.2f')] 
-    ).properties()
-    st.altair_chart(total_doses_chart, use_container_width=True)    
+    ).properties(title="Doses by age group")
+    st.altair_chart(total_doses_chart, use_container_width=True)     
+
+def ltla(latest_daily_date, latest_weekly_date):
+    st.title("Vaccines Administered by Lower Tier Local Authority")
+    st.write(f"Using weekly data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}")
+    st.markdown("This app contains charts showing how the Coronavirus vaccination program is going in the UK by Local Tier Local Authority, using the weekly data published at [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/)")
+    
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
 
     st.header("By local area")
     combined = compute_vaccination_rates(spreadsheet)
@@ -244,9 +245,8 @@ def create_vaccines_dataframe(latest_date):
 
 PAGES = {
     "Overview": overview,
-    "Cumulative": cumulative,
-    "Daily": daily,
-    "Weekly": weekly,
+    "Daily Doses": daily,
+    "Weekly Doses": weekly,
     "Local Authority": ltla
 }
 
@@ -267,8 +267,9 @@ selection = st.sidebar.radio("Select Dashboard", page_keys, index=page_keys.inde
 page = PAGES[selection]
 
 population = 68134973
-latest_date = parser.parse("2021-04-08") if selection == "Doses by Local Authority" else parser.parse("2021-04-08")
-page(latest_date)
+latest_daily_date = parser.parse("2021-04-08")
+latest_weekly_date = parser.parse("2021-04-08")
+page(latest_daily_date, latest_weekly_date)
 
 # if selection:
 #     st.experimental_set_query_params(page=page_keys.index(selection))
