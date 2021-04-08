@@ -243,5 +243,5 @@ selection = st.sidebar.radio("Select Dashboard", list(PAGES.keys()))
 page = PAGES[selection]
 
 population = 68134973
-latest_date = parser.parse("2021-04-01") if selection == "Doses by Local Authority" else parser.parse("2021-04-07")
+latest_date = parser.parse("2021-04-01") if selection == "Doses by Local Authority" else parser.parse("2021-04-08")
 page(latest_date)
