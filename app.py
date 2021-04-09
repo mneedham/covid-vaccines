@@ -1,4 +1,5 @@
 import streamlit as st
+import SessionState
 import pandas as pd
 import altair as alt
 import numpy as np
@@ -6,7 +7,6 @@ from datetime import datetime, timedelta
 from dateutil import parser
 from utils import suffix, custom_strftime
 from ltla import compute_vaccination_rates, total_vaccination_rates
-
 
 def daily(latest_daily_date, latest_weekly_date):
     all_df = create_vaccines_dataframe(latest_daily_date).copy()
@@ -255,15 +255,19 @@ alt.themes.enable('fivethirtyeight')
 st.set_page_config(layout="wide")
 st.sidebar.title("UK Coronavirus Vaccines")
 
-default = "Overview"
 query_params = st.experimental_get_query_params()
-if "page" in query_params:
-    page_query_string = query_params["page"][0]
-    if page_query_string in PAGES.keys():
-        default = page_query_string
+app_state = st.experimental_get_query_params()
+
+session_state = SessionState.get(first_query_params=query_params)
+first_query_params = session_state.first_query_params
+
+default_index = eval(first_query_params["page"][0]) if "page" in app_state else 0
 
 page_keys = list(PAGES.keys())
-selection = st.sidebar.radio("Select Dashboard", page_keys, index=page_keys.index(default))
+selection = st.sidebar.radio("Select Dashboard", page_keys, index=default_index)
+
+app_state["page"] = page_keys.index(selection)
+st.experimental_set_query_params(**app_state)
 
 page = PAGES[selection]
 
@@ -271,6 +275,3 @@ population = 68134973
 latest_daily_date = parser.parse("2021-04-08")
 latest_weekly_date = parser.parse("2021-04-08")
 page(latest_daily_date, latest_weekly_date)
-
-# if selection:
-#     st.experimental_set_query_params(page=page_keys.index(selection))
