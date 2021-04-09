@@ -220,10 +220,10 @@ def ltla(latest_daily_date, latest_weekly_date):
         weekday_doses_chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
             y=alt.Y('LTLA Name', sort=["index"], axis=alt.Axis(labels=True, ticks=False), title=None),
             x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),
-            color=alt.Color('LTLA Name', legend=alt.Legend(orient='bottom')),
+            color=alt.Color('LTLA Name', legend=alt.Legend(orient='bottom', columns=2)),
             row=alt.Row("Age", title=None, sort=["index"]),        
             tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
-        ).properties(title="% of people vaccinated")
+        ).properties(title="% of people vaccinated", width=350)
         st.altair_chart(weekday_doses_chart)  
     else:
         st.write("Select local areas to see the % of people vaccinated")
