@@ -1,6 +1,6 @@
 import streamlit as st
 
-import SessionState
+import SessionState as session_state
 
 import pandas as pd
 import altair as alt
@@ -210,19 +210,23 @@ def ltla(latest_daily_date, latest_weekly_date):
     st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
 
     st.header("Specific local area")
-    option = st.selectbox('Select local area:', combined["LTLA Name"].values)
+    option = st.multiselect('Select local area:', list(combined["LTLA Name"].values), ["Sutton", "Waverley"])
 
-    local_area = combined.loc[combined["LTLA Name"] == option].drop(["LTLA Name", "LTLA Code"], axis=1)
-    melted_local_area = local_area.melt(value_vars=local_area.columns)
-    melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
-    melted_local_area.reset_index(level=0, inplace=True)
-    
-    weekday_doses_chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
-        y=alt.Y('Age', sort=["index"]),
-        x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),    
-        tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
-    ).properties()
-    st.altair_chart(weekday_doses_chart, use_container_width=True)  
+    if len(option) > 0:
+        local_area = combined.loc[combined["LTLA Name"].isin(option)].drop(["LTLA Code"], axis=1)
+        melted_local_area = local_area.melt(value_vars=local_area.columns.drop(["LTLA Name"]), id_vars=["LTLA Name"])
+        melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
+        melted_local_area.reset_index(level=0, inplace=True)
+        weekday_doses_chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+            y=alt.Y('LTLA Name', sort=["index"], axis=alt.Axis(labels=True, ticks=False), title=None),
+            x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),
+            color=alt.Color('LTLA Name', legend=alt.Legend(orient='bottom')),
+            row=alt.Row("Age", title=None, sort=["index"]),        
+            tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
+        ).properties(title="% of people vaccinated")
+        st.altair_chart(weekday_doses_chart)  
+    else:
+        st.write("Select local areas to see the % of people vaccinated")
 
 @st.cache 
 def create_vaccines_dataframe(latest_date):
@@ -257,15 +261,12 @@ alt.themes.enable('fivethirtyeight')
 st.set_page_config(layout="wide")
 st.sidebar.title("UK Coronavirus Vaccines")
 
-
 radio_list = list(PAGES.keys())
-default_radio = 0
-
-selection = st.sidebar.radio("Select Dashboard", radio_list, index=default_radio)
+selection = st.sidebar.radio("Select Dashboard", radio_list)
 
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-08")
+latest_daily_date = parser.parse("2021-04-09")
 latest_weekly_date = parser.parse("2021-04-08")
 page(latest_daily_date, latest_weekly_date)
