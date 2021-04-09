@@ -1,8 +1,6 @@
 import streamlit as st
 
-import SessionState as session_state
-from streamlit.script_runner import RerunException
-from streamlit.script_request_queue import RerunData
+import SessionState
 
 import pandas as pd
 import altair as alt
@@ -259,23 +257,21 @@ alt.themes.enable('fivethirtyeight')
 st.set_page_config(layout="wide")
 st.sidebar.title("UK Coronavirus Vaccines")
 
+default_index = 0
 query_params = st.experimental_get_query_params()
+app_state = st.experimental_get_query_params()
 
-state = session_state.get(
-    session_id=0, first_query_params=st.experimental_get_query_params()
-)
-first_query_params = state.first_query_params
-default_index = int(state.first_query_params.get("page", [0])[0])
+session_state = SessionState.get(first_query_params=query_params)
+first_query_params = session_state.first_query_params
 
-# The trick here is you can't change the default index based on query params on every run!
-# The *only time* you do that is on the *first* run.
-# default_index = eval(first_query_params["page"][0]) if "page" in app_state else 0
+radio_list = list(PAGES.keys())
+print(app_state, first_query_params)
+default_index = eval(first_query_params["radio"][0]) if "radio" in app_state else 0
 
-page_keys = list(PAGES.keys())
-selection = st.sidebar.radio("Select Dashboard", page_keys, key=state.session_id, index=default_index)
-print("selection", selection)
-query_params["page"] = page_keys.index(selection)
-st.experimental_set_query_params(**query_params)
+selection = st.sidebar.radio("Select Dashboard", radio_list, index=default_index)
+
+app_state["radio"] = radio_list.index(selection)
+st.experimental_set_query_params(**app_state)
 
 page = PAGES[selection]
 
