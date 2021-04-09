@@ -272,7 +272,7 @@ default_index = int(state.first_query_params.get("page", [0])[0])
 # default_index = eval(first_query_params["page"][0]) if "page" in app_state else 0
 
 page_keys = list(PAGES.keys())
-selection = st.sidebar.radio("Select Dashboard", page_keys, index=default_index)
+selection = st.sidebar.radio("Select Dashboard", page_keys, key=state.session_id, index=default_index)
 
 query_params["page"] = page_keys.index(selection)
 st.experimental_set_query_params(**query_params)
