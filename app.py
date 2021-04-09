@@ -259,7 +259,8 @@ st.sidebar.title("UK Coronavirus Vaccines")
 
 app_state = st.experimental_get_query_params()
 app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()} # fetch the first item in each query string as we don't have multiple values for each query string key in this example
-
+st.write("initial")
+st.write(app_state)
 
 radio_list = list(PAGES.keys())
 default_radio = int(app_state["radio"]) if "radio" in app_state else 0
