@@ -257,18 +257,17 @@ alt.themes.enable('fivethirtyeight')
 st.set_page_config(layout="wide")
 st.sidebar.title("UK Coronavirus Vaccines")
 
-default_index = 0
-query_params = st.experimental_get_query_params()
 app_state = st.experimental_get_query_params()
+app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()} # fetch the first item in each query string as we don't have multiple values for each query string key in this example
 
-session_state = SessionState.get(first_query_params=query_params)
-first_query_params = session_state.first_query_params
 
 radio_list = list(PAGES.keys())
-print(app_state, first_query_params)
-default_index = eval(first_query_params["radio"][0]) if "radio" in app_state else 0
+default_radio = int(app_state["radio"]) if "radio" in app_state else 0
 
-selection = st.sidebar.radio("Select Dashboard", radio_list, index=default_index)
+selection = st.sidebar.radio("Select Dashboard", radio_list, index=default_radio)
+if selection:
+    app_state["radio"] = radio_list.index(selection)
+    st.experimental_set_query_params(**app_state)
 
 app_state["radio"] = radio_list.index(selection)
 st.experimental_set_query_params(**app_state)
