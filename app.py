@@ -257,25 +257,11 @@ alt.themes.enable('fivethirtyeight')
 st.set_page_config(layout="wide")
 st.sidebar.title("UK Coronavirus Vaccines")
 
-app_state = st.experimental_get_query_params()
-app_state = {k: v[0] if isinstance(v, list) else v for k, v in app_state.items()} # fetch the first item in each query string as we don't have multiple values for each query string key in this example
-st.write("initial")
-st.write(app_state)
 
 radio_list = list(PAGES.keys())
-default_radio = int(app_state["radio"]) if "radio" in app_state else 0
+default_radio = 0
 
 selection = st.sidebar.radio("Select Dashboard", radio_list, index=default_radio)
-if selection:
-    new_index = radio_list.index(selection)
-    if not("radio" in app_state) or new_index != app_state["radio"]:
-        st.write("updating app state")
-        st.write(app_state)
-        app_state["radio"] = new_index
-        st.experimental_set_query_params(**app_state)
-
-app_state["radio"] = radio_list.index(selection)
-st.experimental_set_query_params(**app_state)
 
 page = PAGES[selection]
 
