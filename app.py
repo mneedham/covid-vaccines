@@ -223,8 +223,18 @@ def ltla(latest_daily_date, latest_weekly_date):
             color=alt.Color('LTLA Name', legend=alt.Legend(orient='bottom', columns=2)),
             row=alt.Row("Age", title=None, sort=["index"]),        
             tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
-        ).properties(title="% of people vaccinated", width=250)
-        st.altair_chart(weekday_doses_chart)  
+        ).properties(title="% of people vaccinated")
+
+        st.write("""
+        <style>
+        canvas.marks {
+            max-width: 100%!important;
+            height: auto!important;
+        }
+        </style
+        """, unsafe_allow_html=True)
+
+        st.altair_chart(weekday_doses_chart, use_container_width=True)  
     else:
         st.write("Select local areas to see the % of people vaccinated")
 
