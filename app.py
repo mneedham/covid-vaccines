@@ -266,7 +266,8 @@ default_radio = int(app_state["radio"]) if "radio" in app_state else 0
 
 selection = st.sidebar.radio("Select Dashboard", radio_list, index=default_radio)
 if selection:
-    if new_index != default_radio:
+    new_index = radio_list.index(selection)
+    if not("radio" in app_state) or new_index != app_state["radio"]:
         app_state["radio"] = new_index
         st.experimental_set_query_params(**app_state)
 
