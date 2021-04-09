@@ -261,6 +261,8 @@ app_state = st.experimental_get_query_params()
 session_state = SessionState.get(first_query_params=query_params)
 first_query_params = session_state.first_query_params
 print(app_state, first_query_params)
+st.write(app_state)
+st.write(first_query_params)
 default_index = eval(first_query_params["page"][0]) if "page" in app_state else 0
 
 page_keys = list(PAGES.keys())
