@@ -269,6 +269,7 @@ if selection:
     new_index = radio_list.index(selection)
     if not("radio" in app_state) or new_index != app_state["radio"]:
         st.write("updating app state")
+        st.write(app_state)
         app_state["radio"] = new_index
         st.experimental_set_query_params(**app_state)
 
