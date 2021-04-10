@@ -7,8 +7,8 @@ import altair as alt
 import numpy as np
 from datetime import datetime, timedelta
 from dateutil import parser
-from utils import suffix, custom_strftime
-from ltla import compute_vaccination_rates, total_vaccination_rates
+from utils import suffix, custom_strftime, make_charts_responsive
+from data import all_vaccination_rates, total_vaccination_rates, create_vaccines_dataframe
 
 def daily(latest_daily_date, latest_weekly_date):
     all_df = create_vaccines_dataframe(latest_daily_date).copy()
@@ -205,7 +205,7 @@ def ltla(latest_daily_date, latest_weekly_date):
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
 
     st.header("All local areas")
-    combined = compute_vaccination_rates(spreadsheet)
+    combined = all_vaccination_rates(spreadsheet)
     formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
     st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
 
@@ -220,45 +220,16 @@ def ltla(latest_daily_date, latest_weekly_date):
         weekday_doses_chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
             y=alt.Y('LTLA Name', sort=["index"], axis=alt.Axis(labels=True, ticks=False), title=None),
             x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),
-            color=alt.Color('LTLA Name', legend=alt.Legend(orient='bottom', columns=2)),
+            color=alt.Color('LTLA Name', legend=alt.Legend(orient='top', columns=2) ),
             row=alt.Row("Age", title=None, sort=["index"]),        
             tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
         ).properties(title="% of people vaccinated")
 
-        st.write("""
-        <style>
-        canvas.marks {
-            max-width: 100%!important;
-            height: auto!important;
-        }
-        </style
-        """, unsafe_allow_html=True)
+        make_charts_responsive()
 
         st.altair_chart(weekday_doses_chart, use_container_width=True)  
     else:
         st.write("Select local areas to see the % of people vaccinated")
-
-@st.cache 
-def create_vaccines_dataframe(latest_date):
-    dose1 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose1.csv")
-    dose2 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose2.csv")
-    df = pd.merge(dose1, dose2, on=["date", "areaName", "areaType", "areaCode"])
-
-    df.loc[:, "totalByDay"] = df.newPeopleVaccinatedSecondDoseByPublishDate + df.newPeopleVaccinatedFirstDoseByPublishDate
-    df.loc[:, "percentageFirstDose"] = 100.0* df.newPeopleVaccinatedFirstDoseByPublishDate / df.totalByDay
-
-    cols = ["date", "newPeopleVaccinatedSecondDoseByPublishDate", "newPeopleVaccinatedFirstDoseByPublishDate", "totalByDay", "percentageFirstDose"]
-    all_df = df[df.areaName == "United Kingdom"]
-    all_df = all_df.loc[~pd.isna(all_df.totalByDay)]
-
-    all_df = all_df.rename(columns={
-        "newPeopleVaccinatedFirstDoseByPublishDate": "firstDose", 
-        "newPeopleVaccinatedSecondDoseByPublishDate": "secondDose",
-        "cumPeopleVaccinatedFirstDoseByPublishDate": "firstDoseCumulative",
-        "cumPeopleVaccinatedSecondDoseByPublishDate": "secondDoseCumulative"
-    })
-    all_df.loc[:, "totalDoses"] = all_df.firstDose + all_df.secondDose
-    return all_df
 
 PAGES = {
     "Overview": overview,
