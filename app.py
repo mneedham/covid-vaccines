@@ -182,7 +182,7 @@ def overview(latest_daily_date, latest_weekly_date):
     # total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
     
     st.header("By Age Group")    
-    st.table(total.drop(["Age"], axis=1).style.format({"Population": "{:,d}", "Vaccinations": "{:,d}"}))
+    st.table(total.drop(["Age"], axis=1).style.format({"Population": "{:,d}", "Vaccinations": "{:,d}", "%": "{:.2f}"}))
 
     left, right = st.beta_columns(2)
 
