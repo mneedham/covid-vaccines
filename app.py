@@ -8,7 +8,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from dateutil import parser
 from utils import suffix, custom_strftime, make_charts_responsive
-from data import all_vaccination_rates, total_vaccination_rates, create_vaccines_dataframe
+from data import all_vaccination_rates, total_vaccination_rates, create_vaccines_dataframe, vaccinations_dataframe, population_dataframe, compute_all_vaccination_rates
 
 def daily(latest_daily_date, latest_weekly_date):
     all_df = create_vaccines_dataframe(latest_daily_date).copy()
@@ -197,26 +197,36 @@ def ltla(latest_daily_date, latest_weekly_date):
     st.header("All local areas")
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
-    combined = all_vaccination_rates(spreadsheet)
+    
+    vaccinations = vaccinations_dataframe(spreadsheet)    
+    population = population_dataframe(spreadsheet)    
+    combined = compute_all_vaccination_rates(vaccinations, population)
+    
     formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
+
     st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
+    st.dataframe(vaccinations.drop(["LTLA Code"], axis=1))
+    st.dataframe(population.drop(["LTLA Code"], axis=1))
+
 
     st.header("Specific local area")
     option = st.multiselect('Select local areas:', list(combined["LTLA Name"].values), ["Sutton", "Waverley"])
 
     if len(option) > 0:
         local_area = combined.loc[combined["LTLA Name"].isin(option)].drop(["LTLA Code"], axis=1)
+        local_area_absolute = vaccinations.loc[vaccinations["LTLA Name"].isin(option)].drop(["LTLA Code"], axis=1)
+        local_area_population = population.loc[population["LTLA Name"].isin(option)].drop(["LTLA Code"], axis=1)
 
-        left, right = st.beta_columns(2)
-
-        with right:
+        st.subheader("Percentage vaccinated by age group")
+        left1, right1 = st.beta_columns(2)
+        with right1:
             flipped_local_area = local_area.T
             flipped_local_area.columns = local_area.loc[:, "LTLA Name"]
             flipped_local_area.rename(index={"Under 50": "<50"}, inplace=True)
             formatting = {column: "{:.2f}" for column in set(flipped_local_area.columns) - set(["LTLA Code", "LTLA Name"])}
             st.table(flipped_local_area.drop(["LTLA Name"], axis=0).style.format(formatting))
 
-        with left:            
+        with left1:            
             local_area.rename(columns={"Under 50": "<50"}, inplace=True)
             melted_local_area = local_area.melt(value_vars=local_area.columns.drop(["LTLA Name"]), id_vars=["LTLA Name"])
             melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
@@ -228,10 +238,54 @@ def ltla(latest_daily_date, latest_weekly_date):
                 row=alt.Row("Age", title=None, sort=["index"]),        
                 tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
             ).properties()
-
             make_charts_responsive()
-
             st.altair_chart(chart, use_container_width=True)  
+
+        st.subheader("People vaccinated by age group")
+        left2, right2 = st.beta_columns(2)
+        with right2:
+            flipped_local_area_absolute = local_area_absolute.T
+            flipped_local_area_absolute.columns = local_area_absolute.loc[:, "LTLA Name"]
+            flipped_local_area_absolute.rename(index={"Under 50": "<50"}, inplace=True)            
+            st.table(flipped_local_area_absolute.drop(["LTLA Name"], axis=0)) 
+
+        with left2:            
+            local_area_absolute.rename(columns={"Under 50": "<50"}, inplace=True)
+            melted_local_area = local_area_absolute.melt(value_vars=local_area_absolute.columns.drop(["LTLA Name"]), id_vars=["LTLA Name"])
+            melted_local_area = melted_local_area.rename(columns={"value": "People Vaccinated", "variable": "Age"})    
+            melted_local_area.reset_index(level=0, inplace=True)            
+            chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+                y=alt.Y('LTLA Name', sort=["index"], axis=alt.Axis(labels=True, ticks=False), title=None),
+                x=alt.X('People Vaccinated', title="People Vaccinated"),
+                color=alt.Color('LTLA Name', legend=None ),
+                row=alt.Row("Age", title=None, sort=["index"]),        
+                tooltip=["Age", alt.Tooltip('People Vaccinated', format='.2f')] 
+            ).properties()
+            make_charts_responsive()
+            st.altair_chart(chart, use_container_width=True) 
+
+        st.subheader("Population by age group")
+        left3, right3 = st.beta_columns(2)
+        with right3:
+            flipped_local_area_pop = local_area_population.T
+            flipped_local_area_pop.columns = local_area_population.loc[:, "LTLA Name"]
+            flipped_local_area_pop.rename(index={"Under 50": "<50"}, inplace=True)            
+            st.table(flipped_local_area_pop.drop(["LTLA Name"], axis=0)) 
+
+        with left3:            
+            local_area_population.rename(columns={"Under 50": "<50"}, inplace=True)
+            melted_local_area = local_area_population.melt(value_vars=local_area_population.columns.drop(["LTLA Name"]), id_vars=["LTLA Name"])
+            melted_local_area = melted_local_area.rename(columns={"value": "Population", "variable": "Age"})    
+            melted_local_area.reset_index(level=0, inplace=True)            
+            chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+                y=alt.Y('LTLA Name', sort=["index"], axis=alt.Axis(labels=True, ticks=False), title=None),
+                x=alt.X('Population'),
+                color=alt.Color('LTLA Name', legend=None ),
+                row=alt.Row("Age", title=None, sort=["index"]),        
+                tooltip=["Age", alt.Tooltip('Population', format='.2f')] 
+            ).properties()
+            make_charts_responsive()
+            st.altair_chart(chart, use_container_width=True)       
     else:
         st.write("Select local areas to see the % of people vaccinated")
 
