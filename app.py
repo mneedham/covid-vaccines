@@ -8,10 +8,10 @@ import numpy as np
 from datetime import datetime, timedelta
 from dateutil import parser
 from utils import suffix, custom_strftime, make_charts_responsive
-from data import all_vaccination_rates, total_vaccination_rates, create_vaccines_dataframe, vaccinations_dataframe, population_dataframe, compute_all_vaccination_rates
+import data as dt
 
 def daily(latest_daily_date, latest_weekly_date):
-    all_df = create_vaccines_dataframe(latest_daily_date).copy()
+    all_df = dt.create_vaccines_dataframe(latest_daily_date).copy()
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
     melted_df = melted_df[melted_df.areaName == "United Kingdom"]
     melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})    
@@ -68,7 +68,7 @@ def daily(latest_daily_date, latest_weekly_date):
         st.altair_chart(percentage_doses_chart, use_container_width=True)
 
 def weekly(latest_daily_date, latest_weekly_date):
-    all_df = create_vaccines_dataframe(latest_daily_date).copy()
+    all_df = dt.create_vaccines_dataframe(latest_daily_date).copy()
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
     melted_df = melted_df[melted_df.areaName == "United Kingdom"]
     melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})    
@@ -143,7 +143,7 @@ def weekly(latest_daily_date, latest_weekly_date):
         st.altair_chart(weekday_doses_chart, use_container_width=True)    
 
 def overview(latest_daily_date, latest_weekly_date):    
-    all_df = create_vaccines_dataframe(latest_daily_date)
+    all_df = dt.create_vaccines_dataframe(latest_daily_date)
 
     first_dose = all_df['firstDoseCumulative'].max()
     second_dose = all_df['secondDoseCumulative'].max()
@@ -177,7 +177,7 @@ def overview(latest_daily_date, latest_weekly_date):
     st.altair_chart(cumulative_first_doses_chart, use_container_width=True)
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
-    total = total_vaccination_rates(spreadsheet)
+    total = dt.total_vaccination_rates(spreadsheet)
     total.loc[:, "%"] = (total.loc[:, "%"] * 100)
     total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
     total.loc[:, "Vaccinations"] = total["Vaccinations"].map('{:,d}'.format)
@@ -198,9 +198,9 @@ def ltla(latest_daily_date, latest_weekly_date):
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     
-    vaccinations = vaccinations_dataframe(spreadsheet)    
-    population = population_dataframe(spreadsheet)    
-    combined = compute_all_vaccination_rates(vaccinations, population)
+    vaccinations = dt.vaccinations_dataframe(spreadsheet)    
+    population = dt.population_dataframe(spreadsheet)    
+    combined = dt.compute_all_vaccination_rates(vaccinations, population)
     
     formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
 
