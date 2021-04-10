@@ -259,10 +259,9 @@ page(latest_daily_date, latest_weekly_date)
 st.markdown(f"""- - -
 ### Data provenance
 The data used in this app comes from: 
-* Weekly data published at [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/)
-* Daily data published at [coronavirus.data.gov.uk/details/vaccinations](https://coronavirus.data.gov.uk/details/vaccinations)
-
-Daily data as of {custom_strftime('{S} %B %Y', latest_daily_date)}  
-Weekly data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}
+* [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/) for vaccinations by Local Tier Local Authority and Age Group  
+Latest data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}
+* [coronavirus.data.gov.uk/details/vaccinations](https://coronavirus.data.gov.uk/details/vaccinations) for total daily vaccinations  
+Latest data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}
 """)
     
