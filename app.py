@@ -247,8 +247,8 @@ def ltla(latest_daily_date, latest_weekly_date):
                 color=alt.Color('LTLA Name', legend=None ),
                 row=alt.Row("Age", title=None, sort=["index"]),        
                 tooltip=["Age", alt.Tooltip('Percentage', format='.2f')] 
-            ).properties()
-            make_charts_responsive()
+            ).properties(autosize=alt.AutoSizeParams(type='fit',contains='padding'))
+            # make_charts_responsive()
             st.altair_chart(chart, use_container_width=True)  
 
         st.subheader("People vaccinated by age group")
@@ -270,8 +270,8 @@ def ltla(latest_daily_date, latest_weekly_date):
                 color=alt.Color('LTLA Name', legend=None ),
                 row=alt.Row("Age", title=None, sort=["index"]),        
                 tooltip=["Age", alt.Tooltip('People Vaccinated', format='.2f')] 
-            ).properties()
-            make_charts_responsive()
+            ).properties(autosize=alt.AutoSizeParams(type='fit',contains='padding'))
+            # make_charts_responsive()
             st.altair_chart(chart, use_container_width=True) 
 
         st.subheader("Population by age group")
@@ -293,8 +293,8 @@ def ltla(latest_daily_date, latest_weekly_date):
                 color=alt.Color('LTLA Name', legend=None ),
                 row=alt.Row("Age", title=None, sort=["index"]),        
                 tooltip=["Age", alt.Tooltip('Population', format='.2f')] 
-            ).properties()
-            make_charts_responsive()
+            ).properties(autosize=alt.AutoSizeParams(type='fit',contains='padding'))
+            # make_charts_responsive()
             st.altair_chart(chart, use_container_width=True)       
     else:
         st.write("Select local areas to see the % of people vaccinated")
@@ -316,7 +316,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-09")
+latest_daily_date = parser.parse("2021-04-10")
 latest_weekly_date = parser.parse("2021-04-08")
 page(latest_daily_date, latest_weekly_date)
 
