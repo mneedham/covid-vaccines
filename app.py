@@ -180,17 +180,29 @@ def overview(latest_daily_date, latest_weekly_date):
     total = dt.total_vaccination_rates(spreadsheet)
     total.loc[:, "%"] = (total.loc[:, "%"] * 100)
     total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
-    total.loc[:, "Vaccinations"] = total["Vaccinations"].map('{:,d}'.format)
+
+    total.loc[:, "VaccinationsFormatted"] = total["Vaccinations"].map('{:,d}'.format)
 
     st.header("By Age Group")    
     st.table(total.drop(["Age"], axis=1))
 
-    total_doses_chart = alt.Chart(total, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
-        y=alt.Y('Age', sort=["index"]),
-        x=alt.X('%', scale=alt.Scale(domain=[0, 100])),    
-        tooltip=["Age", alt.Tooltip('%', format='.2f')] 
-    ).properties(title="Doses by age group")
-    st.altair_chart(total_doses_chart, use_container_width=True)     
+    left, right = st.beta_columns(2)
+
+    with left:
+        total_doses_chart = alt.Chart(total, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+            y=alt.Y('Age', sort=["index"]),
+            x=alt.X('%', scale=alt.Scale(domain=[0, 100])),    
+            tooltip=["Age", alt.Tooltip('%', format='.2f')] 
+        ).properties(title="Percentage vaccinated")
+        st.altair_chart(total_doses_chart, use_container_width=True)    
+
+    with right:
+        total_doses_chart2 = alt.Chart(total, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+            y=alt.Y('Age', sort=["index"]),
+            x=alt.X('Vaccinations'),    
+            tooltip=["Age", alt.Tooltip('Vaccinations')] 
+        ).properties(title="People vaccinated")
+        st.altair_chart(total_doses_chart2, use_container_width=True)    
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
