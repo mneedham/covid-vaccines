@@ -212,10 +212,12 @@ def ltla(latest_daily_date, latest_weekly_date):
         with right:
             flipped_local_area = local_area.T
             flipped_local_area.columns = local_area.loc[:, "LTLA Name"]
+            flipped_local_area.rename(index={"Under 50": "<50"}, inplace=True)
             formatting = {column: "{:.2f}" for column in set(flipped_local_area.columns) - set(["LTLA Code", "LTLA Name"])}
             st.table(flipped_local_area.drop(["LTLA Name"], axis=0).style.format(formatting))
 
         with left:            
+            local_area.rename(columns={"Under 50": "<50"}, inplace=True)
             melted_local_area = local_area.melt(value_vars=local_area.columns.drop(["LTLA Name"]), id_vars=["LTLA Name"])
             melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
             melted_local_area.reset_index(level=0, inplace=True)
