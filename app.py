@@ -35,8 +35,7 @@ def daily(latest_daily_date, latest_weekly_date):
 
     weekends = [value for value in melted_daily_doses.date.values if parser.parse(value).weekday() == 0]
 
-    st.title("Daily Vaccines Administered")
-    st.write(f"As of {custom_strftime('{S} %B %Y', latest_daily_date)}")
+    st.title("Daily Vaccines Administered")    
     st.write("This dashboard shows the total number of doses done at the end of each day. Data is only available from 11th January 2021")
     all_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
         x=alt.X('date', axis=alt.Axis(values=weekends)),
@@ -93,8 +92,7 @@ def weekly(latest_daily_date, latest_weekly_date):
 
     weekends = [value for value in melted_daily_doses.date.values if parser.parse(value).weekday() == 0]
 
-    st.title("Weekly Vaccines Administered")
-    st.write(f"Using daily date as of {custom_strftime('{S} %B %Y', latest_daily_date)}")
+    st.title("Weekly Vaccines Administered")    
     st.write("This dashboard shows the total number of doses done at the end of each week. Data is only available from 11th January 2021")
     weekly_left_column, weekly_right_column = st.beta_columns(2)
     with weekly_left_column: 
@@ -158,8 +156,7 @@ def overview(latest_daily_date, latest_weekly_date):
 
     st.title("All Vaccines Administered")
 
-    st.header("Overview")
-    st.write(f"Using daily data as of {custom_strftime('{S} %B %Y', latest_daily_date)}")
+    st.header("Overview")  
     st.table(summary_df) 
 
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
@@ -169,8 +166,7 @@ def overview(latest_daily_date, latest_weekly_date):
     melted_cumulative_doses = melted_df.loc[(melted_df["dose"] == "firstDoseCumulative") | (melted_df["dose"] == "secondDoseCumulative"), :]
     melted_cumulative_doses.loc[:,"dateWeek"] = pd.to_datetime(melted_cumulative_doses.date).dt.strftime('%Y-%U')
 
-    st.header("Cumulative Vaccines Administered")
-    st.write(f"Using daily data as of {custom_strftime('{S} %B %Y', latest_daily_date)}")
+    st.header("Cumulative Vaccines Administered")    
     st.write("This chart shows the total number of doses done at the end of each week.")
     cumulative_first_doses_chart = alt.Chart(melted_cumulative_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
         x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending'), scale=alt.Scale(padding=0)),
@@ -186,8 +182,7 @@ def overview(latest_daily_date, latest_weekly_date):
     total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
     total.loc[:, "Vaccinations"] = total["Vaccinations"].map('{:,d}'.format)
 
-    st.header("By Age Group")
-    st.write(f"Using weekly data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}")
+    st.header("By Age Group")    
     st.table(total.drop(["Age"], axis=1))
 
     total_doses_chart = alt.Chart(total, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
@@ -199,8 +194,6 @@ def overview(latest_daily_date, latest_weekly_date):
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")
-    st.write(f"Using weekly data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}")
-    st.markdown("This app contains charts showing how the Coronavirus vaccination program is going in the UK by Local Tier Local Authority, using the weekly data published at [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/)")
     
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
 
@@ -251,3 +244,14 @@ population = 68134973
 latest_daily_date = parser.parse("2021-04-09")
 latest_weekly_date = parser.parse("2021-04-08")
 page(latest_daily_date, latest_weekly_date)
+
+st.markdown(f"""- - -
+### Data provenance
+The data used in this app comes from: 
+* Weekly data published at [england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations](https://www.england.nhs.uk/statistics/statistical-work-areas/covid-19-vaccinations/)
+* Daily data published at [coronavirus.data.gov.uk/details/vaccinations](https://coronavirus.data.gov.uk/details/vaccinations)
+
+Daily data as of {custom_strftime('{S} %B %Y', latest_daily_date)}  
+Weekly data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}
+""")
+    
