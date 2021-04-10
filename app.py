@@ -194,7 +194,7 @@ def overview(latest_daily_date, latest_weekly_date):
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
-    st.header("All local areas")
+    # st.header("All local areas")
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     
@@ -202,15 +202,15 @@ def ltla(latest_daily_date, latest_weekly_date):
     population = dt.population_dataframe(spreadsheet)    
     combined = dt.compute_all_vaccination_rates(vaccinations, population)
     
-    formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
+    # formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
 
-    st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
-    st.dataframe(vaccinations.drop(["LTLA Code"], axis=1))
-    st.dataframe(population.drop(["LTLA Code"], axis=1))
+    # st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
+    # st.dataframe(vaccinations.drop(["LTLA Code"], axis=1))
+    # st.dataframe(population.drop(["LTLA Code"], axis=1))
 
 
-    st.header("Specific local area")
-    option = st.multiselect('Select local areas:', list(combined["LTLA Name"].values), ["Sutton", "Waverley"])
+    # st.header("Specific local area")
+    option = st.multiselect('Select local areas:', list(combined["LTLA Name"].values), ["Sutton", "Lewisham", "Solihull"])
 
     if len(option) > 0:
         local_area = combined.loc[combined["LTLA Name"].isin(option)].drop(["LTLA Code"], axis=1)
