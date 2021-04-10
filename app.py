@@ -212,6 +212,7 @@ def ltla(latest_daily_date, latest_weekly_date):
         with right:
             flipped_local_area = local_area.T
             flipped_local_area.columns = local_area.loc[:, "LTLA Name"]
+            formatting = {column: "{:.2f}" for column in set(flipped_local_area.columns) - set(["LTLA Code", "LTLA Name"])}
             st.table(flipped_local_area.drop(["LTLA Name"], axis=0).style.format(formatting))
 
         with left:            
