@@ -25,7 +25,7 @@ pipenv shell
 If not, you can install the dependencies using pip directly, as shown below:
 
 ```
-pip install pandas streamlit 
+pip install pandas streamlit xlrd openpyxl altair
 ```
 
 === Running the application
@@ -33,7 +33,7 @@ pip install pandas streamlit
 Once you have the dependencies install, you can launch the Streamlit app using the following command:
 
 ```
-streamlit run analyse.py
+streamlit run app.py
 ```
 
 You should see output similar to the following:
