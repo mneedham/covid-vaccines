@@ -316,7 +316,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-10")
+latest_daily_date = parser.parse("2021-04-11")
 latest_weekly_date = parser.parse("2021-04-08")
 page(latest_daily_date, latest_weekly_date)
 
@@ -328,4 +328,6 @@ Latest data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}
 * [coronavirus.data.gov.uk/details/vaccinations](https://coronavirus.data.gov.uk/details/vaccinations) for total daily vaccinations  
 Latest data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}
 """)
+
+# Scottish data - https://www.opendata.nhs.scot/dataset/covid-19-vaccination-in-scotland/resource/d5ffffc0-f6f3-4b76-8f38-71ccfd7747a4?inner_span=True
     
