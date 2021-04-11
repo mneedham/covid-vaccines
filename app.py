@@ -156,25 +156,27 @@ def overview(latest_daily_date, latest_weekly_date):
 
     st.title("All Vaccines Administered")
 
-    st.header("Overview")  
-    st.table(summary_df) 
+    
+    st.header("Overview")
+    left, right = st.beta_columns(2)
+    with right:
+        st.table(summary_df) 
 
-    melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
-    melted_df = melted_df[melted_df.areaName == "United Kingdom"]
-    melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})
+    with left:
+        melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
+        melted_df = melted_df[melted_df.areaName == "United Kingdom"]
+        melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})
 
-    melted_cumulative_doses = melted_df.loc[(melted_df["dose"] == "firstDoseCumulative") | (melted_df["dose"] == "secondDoseCumulative"), :]
-    melted_cumulative_doses.loc[:,"dateWeek"] = pd.to_datetime(melted_cumulative_doses.date).dt.strftime('%Y-%U')
+        melted_cumulative_doses = melted_df.loc[(melted_df["dose"] == "firstDoseCumulative") | (melted_df["dose"] == "secondDoseCumulative"), :]
+        melted_cumulative_doses.loc[:,"dateWeek"] = pd.to_datetime(melted_cumulative_doses.date).dt.strftime('%Y-%U')
 
-    st.header("Cumulative Vaccines Administered")    
-    st.write("This chart shows the total number of doses done at the end of each week.")
-    cumulative_first_doses_chart = alt.Chart(melted_cumulative_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
-        x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending'), scale=alt.Scale(padding=0)),
-        tooltip=['max(vaccinations)'],
-        y=alt.Y('max(vaccinations)', axis=alt.Axis(title='Vaccinations')),
-        color=alt.Color('dose', legend=alt.Legend(orient='bottom')),
-    ).properties(title='Cumulative doses', height=500)
-    st.altair_chart(cumulative_first_doses_chart, use_container_width=True)
+        cumulative_first_doses_chart = alt.Chart(melted_cumulative_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
+            x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending'), scale=alt.Scale(padding=0)),
+            tooltip=['max(vaccinations)'],
+            y=alt.Y('max(vaccinations)', axis=alt.Axis(title='Vaccinations')),
+            color=alt.Color('dose', legend=alt.Legend(orient='bottom')),
+        ).properties(title='Cumulative doses', height=500)
+        st.altair_chart(cumulative_first_doses_chart, use_container_width=True)
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     total = dt.total_vaccination_rates(spreadsheet)
