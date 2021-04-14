@@ -184,7 +184,15 @@ def overview(latest_daily_date, latest_weekly_date):
     # total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
     
     st.header("By Age Group")    
-    st.table(total.drop(["Age"], axis=1).style.format({"Population": "{:,d}", "Vaccinations": "{:,d}", "%": "{:.2f}"}))
+    st.table((total.drop(["Age"], axis=1).style
+        .format({"Population": "{:,d}", "Vaccinations": "{:,d}", "%": "{:.2f}"})
+        # .bar(color='red', vmin=0, subset=['%'], align='left')
+        # .bar(color='lightgreen', vmin=0, subset=['Vaccinations'], align='left')
+        # .bar(color='lightblue', vmin=0, subset=['Population'], align='left')
+        # .set_table_styles({
+        #     'Population': [{'selector': '','props': [('width', '200px')]}],
+        #     '%': [{'selector': '', 'props': [('background-color', 'black')]}]})
+    ))
 
     left, right = st.beta_columns(2)
 
@@ -318,7 +326,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-12")
+latest_daily_date = parser.parse("2021-04-13")
 latest_weekly_date = parser.parse("2021-04-08")
 page(latest_daily_date, latest_weekly_date)
 
