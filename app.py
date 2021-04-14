@@ -326,7 +326,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-13")
+latest_daily_date = parser.parse("2021-04-14")
 latest_weekly_date = parser.parse("2021-04-08")
 page(latest_daily_date, latest_weekly_date)
 
