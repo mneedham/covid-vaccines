@@ -100,7 +100,7 @@ def daily(latest_daily_date, latest_weekly_date):
         sorted_latest = latest.sort_values("dayOfWeekIndex").drop(["dayOfWeekIndex"], axis=1)
 
         st.table((sorted_latest[["Day", "Previous", "Latest", "Change"]].style
-            .applymap(lambda val: 'background-color: yellow' if val == "Tuesday" else '')
+            .applymap(lambda val: 'background-color: yellow; font-weight: 700;' if val == "Tuesday" else '')
             .format({
                 "Previous": "{:,d}",
                 "Latest": "{:,d}",
