@@ -309,7 +309,7 @@ def ltla(latest_daily_date, latest_weekly_date):
             flipped_local_area_absolute = local_area_absolute.T
             flipped_local_area_absolute.columns = local_area_absolute.loc[:, "LTLA Name"]
             flipped_local_area_absolute.rename(index={"Under 50": "<50"}, inplace=True)            
-            st.table(flipped_local_area_absolute.drop(["LTLA Name"], axis=0)) 
+            st.table(flipped_local_area_absolute.drop(["LTLA Name"], axis=0).style.format({column: "{:,}" for column in flipped_local_area_absolute.columns})) 
 
         with left2:            
             local_area_absolute.rename(columns={"Under 50": "<50"}, inplace=True)
@@ -332,7 +332,7 @@ def ltla(latest_daily_date, latest_weekly_date):
             flipped_local_area_pop = local_area_population.T
             flipped_local_area_pop.columns = local_area_population.loc[:, "LTLA Name"]
             flipped_local_area_pop.rename(index={"Under 50": "<50"}, inplace=True)            
-            st.table(flipped_local_area_pop.drop(["LTLA Name"], axis=0)) 
+            st.table(flipped_local_area_pop.drop(["LTLA Name"], axis=0).style.format({column: "{:,}" for column in flipped_local_area_absolute.columns})) 
 
         with left3:            
             local_area_population.rename(columns={"Under 50": "<50"}, inplace=True)
