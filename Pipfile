@@ -10,6 +10,7 @@ pandas = "*"
 streamlit = "*"
 xlrd = "*"
 openpyxl = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
