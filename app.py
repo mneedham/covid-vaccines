@@ -44,7 +44,7 @@ def daily(latest_daily_date, latest_weekly_date):
         st.header("All doses by day")
         all_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
             x=alt.X('date', axis=alt.Axis(values=weekends)),
-            tooltip=['sum(vaccinations)', 'date'],
+            tooltip=[alt.Tooltip('sum(vaccinations)', format=","), 'date'],
             y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
             order=alt.Order('dose',sort='ascending'),
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
@@ -55,7 +55,7 @@ def daily(latest_daily_date, latest_weekly_date):
         st.header("% of first doses by day")
         percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
             x=alt.X("date", axis=alt.Axis(values=weekends), scale=alt.Scale(padding=0)),
-            tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose"), "date"],
+            tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose", format=".2f"), "date"],
             y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
             .properties(height=500))
         st.altair_chart(percentage_doses_chart, use_container_width=True)        
@@ -67,7 +67,7 @@ def daily(latest_daily_date, latest_weekly_date):
         st.header("7-day rolling average")
         rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
             x=alt.X("date", axis=alt.Axis(values=weekends)),
-            tooltip=['rollingAverage', "date"],
+            tooltip=[alt.Tooltip('rollingAverage', format=",.0f"), "date"],
             y=alt.Y('rollingAverage', axis=alt.Axis(title='Doses')),
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
             )
@@ -141,7 +141,7 @@ def weekly(latest_daily_date, latest_weekly_date):
         all_doses_by_week_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
             x=alt.X('dateWeek'),
             y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
-            tooltip=['sum(vaccinations)'],
+            tooltip=[alt.Tooltip('sum(vaccinations)', format=",")],
             order=alt.Order('dose',sort='ascending'),
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
         ).properties(title='All doses by week', height=500)
@@ -152,7 +152,7 @@ def weekly(latest_daily_date, latest_weekly_date):
             .mark_line(point=True)
             .encode(
                 x=alt.X("dateWeek", scale=alt.Scale(padding=0)),
-                tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose"), "dateWeek"],
+                tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose", format=".2f"), "dateWeek"],
                 y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
             .properties(height=500,title="% of first doses by week"))
 
@@ -162,7 +162,7 @@ def weekly(latest_daily_date, latest_weekly_date):
         all_doses_by_week_chart2 = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
             x=alt.X('dateWeek', scale=alt.Scale(padding=0)),
             y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),    
-            tooltip=[alt.Tooltip('sum(vaccinations)', title="# of vaccinations"), 'dose', 'dateWeek'],
+            tooltip=[alt.Tooltip('sum(vaccinations)', title="# of vaccinations", format=","), 'dose', 'dateWeek'],
             # column='dateWeek',
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
         ).properties(title='All doses by week', height=500)
@@ -170,7 +170,7 @@ def weekly(latest_daily_date, latest_weekly_date):
 
         weekday_doses_chart = alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_area().encode(
             x=alt.X('dateWeek', scale=alt.Scale(padding=0)),
-            tooltip=['sum(vaccinations)', 'dayOfWeek', 'date'],
+            tooltip=[alt.Tooltip('sum(vaccinations)', format=","), 'dayOfWeek', 'date'],
             y=alt.Y('sum(vaccinations)', axis=alt.Axis(title='Vaccinations')),  
             order=alt.Order('dayOfWeekIndex',sort='ascending'),          
             color=alt.Color('dayOfWeek', 
