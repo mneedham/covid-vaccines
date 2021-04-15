@@ -96,14 +96,14 @@ def daily(latest_daily_date, latest_weekly_date):
         latest.loc[:, "totalByDayThisWeek"] = latest.totalByDayThisWeek.astype(int)
         latest.loc[:, "Change"] = 100 * (latest.totalByDayThisWeek - latest.totalByDayLastWeek) / latest.totalByDayLastWeek
 
-        latest = latest.rename(columns = {"totalByDayLastWeek": "Previous", "totalByDayThisWeek": "Latest"})
+        latest = latest.rename(columns = {"totalByDayLastWeek": "Previous Week", "totalByDayThisWeek": "Latest Week"})
         sorted_latest = latest.sort_values("dayOfWeekIndex").drop(["dayOfWeekIndex"], axis=1)
 
-        st.table((sorted_latest[["Day", "Previous", "Latest", "Change"]].style
-            .applymap(lambda val: 'background-color: yellow; font-weight: 700;' if val == "Tuesday" else '')
+        st.table((sorted_latest[["Day", "Previous Week", "Latest Week", "Change"]].style
+            .applymap(lambda val: 'background-color: yellow; font-weight: 700;' if val == (latest_daily_date- timedelta(days=1)).strftime("%A") else '')
             .format({
-                "Previous": "{:,d}",
-                "Latest": "{:,d}",
+                "Previous Week": "{:,d}",
+                "Latest Week": "{:,d}",
                 "Change": "{:.2f}"
             })
             .bar(align='mid', color=['red', 'lightgreen'], subset=["Change"]))
@@ -368,8 +368,8 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-14")
-latest_weekly_date = parser.parse("2021-04-08")
+latest_daily_date = parser.parse("2021-04-15")
+latest_weekly_date = parser.parse("2021-04-15")
 page(latest_daily_date, latest_weekly_date)
 
 st.markdown(f"""- - -
