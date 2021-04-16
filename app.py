@@ -52,13 +52,16 @@ def daily(latest_daily_date, latest_weekly_date):
         st.altair_chart(all_doses_chart, use_container_width=True)
 
     with right1:
-        st.header("% of first doses by day")
-        percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
-            x=alt.X("date", axis=alt.Axis(values=weekends), scale=alt.Scale(padding=0)),
-            tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose", format=".2f"), "date"],
-            y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
-            .properties(height=500))
-        st.altair_chart(percentage_doses_chart, use_container_width=True)        
+        st.header("All doses by day")
+        rolling_average_chart = (alt.Chart(melted_first_second_daily_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
+            x=alt.X("date", axis=alt.Axis(values=weekends)),
+            tooltip=[alt.Tooltip('vaccinations', format=",.0f"), "date"],
+            y=alt.Y('vaccinations', axis=alt.Axis(title='Doses')),
+            color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
+            )
+        .properties(height=500))
+
+        st.altair_chart(rolling_average_chart, use_container_width=True)
 
 
     left2, right2 = st.beta_columns(2)
@@ -76,38 +79,46 @@ def daily(latest_daily_date, latest_weekly_date):
         st.altair_chart(rolling_average_chart, use_container_width=True)
 
     with right2:
-        st.header("Trend by day of week")
-        all_df.loc[:, "dayOfWeek"] = all_df["date"].apply(lambda date: parser.parse(date).strftime("%A"))
-        all_df.loc[:, "dayOfWeekIndex"] = all_df["date"].apply(lambda date: parser.parse(date).strftime("%w"))
-        by_day_of_week = all_df[["date", "totalByDay", "dayOfWeek", "dayOfWeekIndex"]]
-        day_of_week_grouping = by_day_of_week.sort_values("date").groupby(["dayOfWeek", "dayOfWeekIndex"])
-        this_week = day_of_week_grouping.nth(-1)[["totalByDay"]]
-        last_week = day_of_week_grouping.nth(-2)[["totalByDay"]]
-        
-        indices = list(this_week.index) 
+        st.header("% of first doses by day")
+        percentage_doses_chart = (alt.Chart(all_df, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
+            x=alt.X("date", axis=alt.Axis(values=weekends), scale=alt.Scale(padding=0)),
+            tooltip=[alt.Tooltip('mean(percentageFirstDose)', title="% of first dose", format=".2f"), "date"],
+            y=alt.Y('mean(percentageFirstDose)', axis=alt.Axis(title='% first dose')))
+            .properties(height=500))
+        st.altair_chart(percentage_doses_chart, use_container_width=True)        
 
-        latest = pd.merge(last_week, this_week, on=["dayOfWeek", "dayOfWeekIndex"], suffixes=["LastWeek", "ThisWeek"])        
-        # latest.loc[:, "dayOfWeek"] = [index[0] for index in indices]
-        latest = latest.reset_index(drop=True)
+    st.header("Trend by day of week")
+    all_df.loc[:, "dayOfWeek"] = all_df["date"].apply(lambda date: parser.parse(date).strftime("%A"))
+    all_df.loc[:, "dayOfWeekIndex"] = all_df["date"].apply(lambda date: parser.parse(date).strftime("%w"))
+    by_day_of_week = all_df[["date", "totalByDay", "dayOfWeek", "dayOfWeekIndex"]]
+    day_of_week_grouping = by_day_of_week.sort_values("date").groupby(["dayOfWeek", "dayOfWeekIndex"])
+    this_week = day_of_week_grouping.nth(-1)[["totalByDay"]]
+    last_week = day_of_week_grouping.nth(-2)[["totalByDay"]]
+    
+    indices = list(this_week.index) 
 
-        latest.loc[:, "Day"] = [index[0] for index in indices]        
-        latest.loc[:, "dayOfWeekIndex"] = [index[1] for index in indices]        
-        latest.loc[:, "totalByDayLastWeek"] = latest.totalByDayLastWeek.astype(int)
-        latest.loc[:, "totalByDayThisWeek"] = latest.totalByDayThisWeek.astype(int)
-        latest.loc[:, "Change"] = 100 * (latest.totalByDayThisWeek - latest.totalByDayLastWeek) / latest.totalByDayLastWeek
+    latest = pd.merge(last_week, this_week, on=["dayOfWeek", "dayOfWeekIndex"], suffixes=["LastWeek", "ThisWeek"])        
+    # latest.loc[:, "dayOfWeek"] = [index[0] for index in indices]
+    latest = latest.reset_index(drop=True)
 
-        latest = latest.rename(columns = {"totalByDayLastWeek": "Previous Week", "totalByDayThisWeek": "Latest Week"})
-        sorted_latest = latest.sort_values("dayOfWeekIndex").drop(["dayOfWeekIndex"], axis=1)
+    latest.loc[:, "Day"] = [index[0] for index in indices]        
+    latest.loc[:, "dayOfWeekIndex"] = [index[1] for index in indices]        
+    latest.loc[:, "totalByDayLastWeek"] = latest.totalByDayLastWeek.astype(int)
+    latest.loc[:, "totalByDayThisWeek"] = latest.totalByDayThisWeek.astype(int)
+    latest.loc[:, "Change"] = 100 * (latest.totalByDayThisWeek - latest.totalByDayLastWeek) / latest.totalByDayLastWeek
 
-        st.table((sorted_latest[["Day", "Previous Week", "Latest Week", "Change"]].style
-            .applymap(lambda val: 'background-color: yellow; font-weight: 700;' if val == (latest_daily_date- timedelta(days=1)).strftime("%A") else '')
-            .format({
-                "Previous Week": "{:,d}",
-                "Latest Week": "{:,d}",
-                "Change": "{:.2f}"
-            })
-            .bar(align='mid', color=['red', 'lightgreen'], subset=["Change"]))
-        )
+    latest = latest.rename(columns = {"totalByDayLastWeek": "Previous Week", "totalByDayThisWeek": "Latest Week"})
+    sorted_latest = latest.sort_values("dayOfWeekIndex").drop(["dayOfWeekIndex"], axis=1)
+
+    st.table((sorted_latest[["Day", "Previous Week", "Latest Week", "Change"]].style
+        .applymap(lambda val: 'background-color: yellow; font-weight: 700;' if val == (latest_daily_date- timedelta(days=1)).strftime("%A") else '')
+        .format({
+            "Previous Week": "{:,d}",
+            "Latest Week": "{:,d}",
+            "Change": "{:.2f}"
+        })
+        .bar(align='mid', color=['red', 'lightgreen'], subset=["Change"]))
+    )
 
 def weekly(latest_daily_date, latest_weekly_date):
     all_df = dt.create_vaccines_dataframe(latest_daily_date).copy()
