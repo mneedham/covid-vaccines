@@ -4,7 +4,7 @@ import numpy as np
 from dateutil import parser
 from utils import suffix, custom_strftime
 
-@st.cache 
+# @st.cache 
 def create_vaccines_dataframe(latest_date):
     dose1 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose1.csv")
     dose2 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose2.csv")
