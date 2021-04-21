@@ -25,13 +25,21 @@ def daily(latest_daily_date, latest_weekly_date):
     melted_daily_doses = melted_daily_doses.sort_values(["date"])
 
     melted_daily_doses.loc[:, "dateWeek"] = pd.to_datetime(melted_daily_doses.date).dt.strftime('%Y-%U')
+    
     melted_daily_doses.loc[melted_daily_doses.dose == "firstDose", "rollingAverage"] = melted_daily_doses.loc[melted_daily_doses.dose == "firstDose"]["vaccinations"].rolling(7).mean()
     melted_daily_doses.loc[melted_daily_doses.dose == "secondDose", "rollingAverage"] = melted_daily_doses.loc[melted_daily_doses.dose == "secondDose"]["vaccinations"].rolling(7).mean()
+    
     melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "rollingAverage"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].rolling(7).mean()
+    melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "oneWeekAgoDiff"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].diff(periods=7)
+    melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "oneWeekAgoPercentage"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].pct_change(periods=7)*100
+
+
     melted_daily_doses.loc[:, "dayOfWeek"] = melted_daily_doses.date.apply(lambda item: parser.parse(item).strftime("%A"))
     melted_daily_doses.loc[:, "dayOfWeekIndex"] = melted_daily_doses.date.apply(lambda item: parser.parse(item).strftime("%w"))
 
     melted_first_second_daily_doses = melted_daily_doses.loc[(melted_daily_doses.dose.isin(["firstDose", "secondDose"]))]
+
+    melted_total_doses = melted_daily_doses.loc[(melted_daily_doses.dose.isin(["totalDoses"]))]
 
     weekends = [value for value in melted_daily_doses.date.values if parser.parse(value).weekday() == 0]
 
@@ -65,7 +73,7 @@ def daily(latest_daily_date, latest_weekly_date):
 
 
     left2, right2 = st.beta_columns(2)
-
+    print("melted_daily_doses", melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"])
     with left2:    
         st.header("7-day rolling average")
         rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
@@ -87,38 +95,22 @@ def daily(latest_daily_date, latest_weekly_date):
             .properties(height=500))
         st.altair_chart(percentage_doses_chart, use_container_width=True)        
 
-    st.header("Trend by day of week")
-    all_df.loc[:, "dayOfWeek"] = all_df["date"].apply(lambda date: parser.parse(date).strftime("%A"))
-    all_df.loc[:, "dayOfWeekIndex"] = all_df["date"].apply(lambda date: parser.parse(date).strftime("%w"))
-    by_day_of_week = all_df[["date", "totalByDay", "dayOfWeek", "dayOfWeekIndex"]]
-    day_of_week_grouping = by_day_of_week.sort_values("date").groupby(["dayOfWeek", "dayOfWeekIndex"])
-    this_week = day_of_week_grouping.nth(-1)[["totalByDay"]]
-    last_week = day_of_week_grouping.nth(-2)[["totalByDay"]]
-    
-    indices = list(this_week.index) 
+    st.header("% change vs same day last week")
 
-    latest = pd.merge(last_week, this_week, on=["dayOfWeek", "dayOfWeekIndex"], suffixes=["LastWeek", "ThisWeek"])        
-    # latest.loc[:, "dayOfWeek"] = [index[0] for index in indices]
-    latest = latest.reset_index(drop=True)
+    chart = (alt.Chart(melted_total_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
+                .mark_bar(point=True)
+                .encode(
+                    x=alt.X("date", axis=alt.Axis(values=weekends)),
+                    tooltip=["date", 
+                        alt.Tooltip('vaccinations', title="This Week", format=","), 
+                        alt.Tooltip('oneWeekAgoDiff', title="Change from last week", format=","),
+                        alt.Tooltip('oneWeekAgoPercentage', title="% change from last week", format=",.2f")                        
+                        ],
+                    y=alt.Y('oneWeekAgoPercentage', axis=alt.Axis(title='Doses'), impute={'value': 0}),
+                    color=alt.condition(alt.datum.oneWeekAgoPercentage > 0, alt.value("green"),  alt.value("red"))
+                    ).properties(height=500))
 
-    latest.loc[:, "Day"] = [index[0] for index in indices]        
-    latest.loc[:, "dayOfWeekIndex"] = [index[1] for index in indices]        
-    latest.loc[:, "totalByDayLastWeek"] = latest.totalByDayLastWeek.astype(int)
-    latest.loc[:, "totalByDayThisWeek"] = latest.totalByDayThisWeek.astype(int)
-    latest.loc[:, "Change"] = 100 * (latest.totalByDayThisWeek - latest.totalByDayLastWeek) / latest.totalByDayLastWeek
-
-    latest = latest.rename(columns = {"totalByDayLastWeek": "Previous Week", "totalByDayThisWeek": "Latest Week"})
-    sorted_latest = latest.sort_values("dayOfWeekIndex").drop(["dayOfWeekIndex"], axis=1)
-
-    st.table((sorted_latest[["Day", "Previous Week", "Latest Week", "Change"]].style
-        .applymap(lambda val: 'background-color: yellow; font-weight: 700;' if val == (latest_daily_date- timedelta(days=1)).strftime("%A") else '')
-        .format({
-            "Previous Week": "{:,d}",
-            "Latest Week": "{:,d}",
-            "Change": "{:.2f}"
-        })
-        .bar(align='mid', color=['red', 'lightgreen'], subset=["Change"]))
-    )
+    st.altair_chart(chart, use_container_width=True)
 
 def weekly(latest_daily_date, latest_weekly_date):
     all_df = dt.create_vaccines_dataframe(latest_daily_date).copy()
@@ -379,7 +371,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-20")
+latest_daily_date = parser.parse("2021-04-21")
 latest_weekly_date = parser.parse("2021-04-15")
 page(latest_daily_date, latest_weekly_date)
 
