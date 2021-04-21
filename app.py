@@ -30,6 +30,7 @@ def daily(latest_daily_date, latest_weekly_date):
     melted_daily_doses.loc[melted_daily_doses.dose == "secondDose", "rollingAverage"] = melted_daily_doses.loc[melted_daily_doses.dose == "secondDose"]["vaccinations"].rolling(7).mean()
     
     melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "rollingAverage"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].rolling(7).mean()
+    melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "oneWeekAgo"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].shift(periods=7)
     melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "oneWeekAgoDiff"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].diff(periods=7)
     melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses", "oneWeekAgoPercentage"] = melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"]["vaccinations"].pct_change(periods=7)*100
 
@@ -95,22 +96,24 @@ def daily(latest_daily_date, latest_weekly_date):
             .properties(height=500))
         st.altair_chart(percentage_doses_chart, use_container_width=True)        
 
-    st.header("% change vs same day last week")
+    left3, right3 = st.beta_columns(2)
+    with left3:
+        st.header("% change vs same day last week")
+        chart = (alt.Chart(melted_total_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
+                    .mark_bar(point=True)
+                    .encode(
+                        x=alt.X("date", axis=alt.Axis(values=weekends)),
+                        tooltip=["date", 
+                            alt.Tooltip('vaccinations', title="This Week", format=","), 
+                            alt.Tooltip('oneWeekAgo', title="Last week", format=","),
+                            alt.Tooltip('oneWeekAgoDiff', title="Absolute change", format=","),
+                            alt.Tooltip('oneWeekAgoPercentage', title="% change", format=",.2f")                        
+                            ],
+                        y=alt.Y('oneWeekAgoPercentage', axis=alt.Axis(title='Doses'), impute={'value': 0}),
+                        color=alt.condition(alt.datum.oneWeekAgoPercentage > 0, alt.value("green"),  alt.value("red"))
+                        ).properties(height=500))
 
-    chart = (alt.Chart(melted_total_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
-                .mark_bar(point=True)
-                .encode(
-                    x=alt.X("date", axis=alt.Axis(values=weekends)),
-                    tooltip=["date", 
-                        alt.Tooltip('vaccinations', title="This Week", format=","), 
-                        alt.Tooltip('oneWeekAgoDiff', title="Change from last week", format=","),
-                        alt.Tooltip('oneWeekAgoPercentage', title="% change from last week", format=",.2f")                        
-                        ],
-                    y=alt.Y('oneWeekAgoPercentage', axis=alt.Axis(title='Doses'), impute={'value': 0}),
-                    color=alt.condition(alt.datum.oneWeekAgoPercentage > 0, alt.value("green"),  alt.value("red"))
-                    ).properties(height=500))
-
-    st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, use_container_width=True)
 
 def weekly(latest_daily_date, latest_weekly_date):
     all_df = dt.create_vaccines_dataframe(latest_daily_date).copy()
