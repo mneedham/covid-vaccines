@@ -98,18 +98,18 @@ def daily(latest_daily_date, latest_weekly_date):
 
     left3, right3 = st.beta_columns(2)
     with left3:
-        st.header("% change vs same day last week")
+        st.header("Change vs same day last week")
         chart = (alt.Chart(melted_total_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
                     .mark_bar(point=True)
                     .encode(
                         x=alt.X("date", axis=alt.Axis(values=weekends)),
                         tooltip=["date", 
-                            alt.Tooltip('vaccinations', title="This Week", format=","), 
-                            alt.Tooltip('oneWeekAgo', title="Last week", format=","),
+                            alt.Tooltip('vaccinations', title="Today", format=","), 
+                            alt.Tooltip('oneWeekAgo', title="Last week on this day", format=","),
                             alt.Tooltip('oneWeekAgoDiff', title="Absolute change", format=","),
                             alt.Tooltip('oneWeekAgoPercentage', title="% change", format=",.2f")                        
                             ],
-                        y=alt.Y('oneWeekAgoPercentage', axis=alt.Axis(title='Doses'), impute={'value': 0}),
+                        y=alt.Y('oneWeekAgoPercentage', axis=alt.Axis(title='% change'), impute={'value': 0}),
                         color=alt.condition(alt.datum.oneWeekAgoPercentage > 0, alt.value("green"),  alt.value("red"))
                         ).properties(height=500))
 
@@ -374,7 +374,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-21")
+latest_daily_date = parser.parse("2021-04-22")
 latest_weekly_date = parser.parse("2021-04-15")
 page(latest_daily_date, latest_weekly_date)
 
