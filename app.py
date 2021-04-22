@@ -1,7 +1,5 @@
 import streamlit as st
 
-import SessionState as session_state
-
 import pandas as pd
 import altair as alt
 import numpy as np
@@ -9,9 +7,10 @@ from datetime import datetime, timedelta
 from dateutil import parser
 from utils import suffix, custom_strftime, make_charts_responsive
 import data as dt
+import st_data as sdt
 
 def daily(latest_daily_date, latest_weekly_date):
-    all_df = dt.create_vaccines_dataframe(latest_daily_date).copy()
+    all_df = sdt.create_vaccines_dataframe(latest_daily_date).copy()
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
     melted_df = melted_df[melted_df.areaName == "United Kingdom"]
     melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})    
@@ -116,7 +115,7 @@ def daily(latest_daily_date, latest_weekly_date):
         st.altair_chart(chart, use_container_width=True)
 
 def weekly(latest_daily_date, latest_weekly_date):
-    all_df = dt.create_vaccines_dataframe(latest_daily_date).copy()
+    all_df = sdt.create_vaccines_dataframe(latest_daily_date).copy()
     melted_df = all_df.melt(value_vars=["firstDose", "secondDose", "firstDoseCumulative", "secondDoseCumulative", "totalDoses"], id_vars=["date", "areaName"])
     melted_df = melted_df[melted_df.areaName == "United Kingdom"]
     melted_df = melted_df.rename(columns={"value": "vaccinations", "variable": "dose"})    
@@ -191,7 +190,7 @@ def weekly(latest_daily_date, latest_weekly_date):
         st.altair_chart(weekday_doses_chart, use_container_width=True)    
 
 def overview(latest_daily_date, latest_weekly_date):    
-    all_df = dt.create_vaccines_dataframe(latest_daily_date)
+    all_df = sdt.create_vaccines_dataframe(latest_daily_date)
 
     first_dose = all_df['firstDoseCumulative'].max()
     second_dose = all_df['secondDoseCumulative'].max()
@@ -266,8 +265,8 @@ def ltla(latest_daily_date, latest_weekly_date):
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     
-    vaccinations = dt.vaccinations_dataframe(spreadsheet)    
-    population = dt.population_dataframe(spreadsheet)    
+    vaccinations = sdt.vaccinations_dataframe(spreadsheet)    
+    population = sdt.population_dataframe(spreadsheet)    
     combined = dt.compute_all_vaccination_rates(vaccinations, population)
     
     # formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}

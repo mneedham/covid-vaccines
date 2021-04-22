@@ -4,7 +4,6 @@ import numpy as np
 from dateutil import parser
 from utils import suffix, custom_strftime
 
-@st.cache 
 def create_vaccines_dataframe(latest_date):
     dose1 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose1.csv")
     dose2 = pd.read_csv(f"data/data_{latest_date.strftime('%Y-%b-%d')}-dose2.csv")
@@ -26,7 +25,6 @@ def create_vaccines_dataframe(latest_date):
     all_df.loc[:, "totalDoses"] = all_df.firstDose + all_df.secondDose
     return all_df
 
-@st.cache
 def vaccinations_dataframe(spreadsheet):
     vaccinations = pd.read_excel(spreadsheet, "LTLA", usecols="F:P")
     columns = np.concatenate((vaccinations.loc[10,:][:2].values, vaccinations.loc[11,:][2:].values), axis=None)
@@ -36,7 +34,6 @@ def vaccinations_dataframe(spreadsheet):
     vaccinations = vaccinations.convert_dtypes()
     return vaccinations    
 
-@st.cache
 def population_dataframe(spreadsheet):
     population = pd.read_excel(spreadsheet, "Population estimates (NIMS)", usecols="D:O")
     population_columns = np.concatenate((population.loc[10,:][:2], population.loc[11, :][2:]), axis=None)
