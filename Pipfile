@@ -12,6 +12,9 @@ xlrd = "*"
 openpyxl = "*"
 matplotlib = "*"
 tabulate = "*"
+vega = "*"
+altair-saver = "*"
+seaborn = "*"
 
 [requires]
 python_version = "3.8"
