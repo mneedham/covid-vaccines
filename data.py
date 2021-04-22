@@ -43,7 +43,7 @@ def population_dataframe(spreadsheet):
     population = population.loc[14:327,]
     population.columns = population_columns
     population.insert(loc=2, column="Under 45", value=population["Under 16"] + population["16-44"])
-    population = population.drop(["Under 16", "16-44"], axis=1)
+    population = population.drop(["Under 16", "16-44"], axis=1) 
     population = population.convert_dtypes()
     return population
 
