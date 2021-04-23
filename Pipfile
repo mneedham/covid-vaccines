@@ -15,6 +15,7 @@ tabulate = "*"
 vega = "*"
 altair-saver = "*"
 seaborn = "*"
+selenium = "*"
 
 [requires]
 python_version = "3.8"
