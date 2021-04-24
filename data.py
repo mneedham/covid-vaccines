@@ -26,11 +26,10 @@ def create_vaccines_dataframe(latest_date):
     return all_df
 
 def vaccinations_dataframe(spreadsheet):
-    vaccinations = pd.read_excel(spreadsheet, "LTLA", usecols="F:P")
-    columns = np.concatenate((vaccinations.loc[10,:][:2].values, vaccinations.loc[11,:][2:].values), axis=None)
+    vaccinations = pd.read_excel(spreadsheet, "LTLA", usecols="B:P")
+    columns = np.concatenate((vaccinations.loc[10,:][:6].values, vaccinations.loc[11,:][6:].values), axis=None)
     vaccinations = vaccinations.loc[14:327,]
     vaccinations.columns = columns
-    # vaccinations = vaccinations.drop(["Region Code (Administrative)", "Region Name (administrative)"], axis=1)
     vaccinations = vaccinations.convert_dtypes()
     return vaccinations    
 
@@ -50,7 +49,7 @@ def all_vaccination_rates(spreadsheet):
     return compute_all_vaccination_rates(vaccinations, population)
 
 def compute_all_vaccination_rates(vaccinations, population):    
-    return (vaccinations.select_dtypes(exclude='string').div(population.select_dtypes(exclude='string')) * 100).combine_first(population)[vaccinations.columns]
+    return (vaccinations.select_dtypes(exclude='string').div(population.select_dtypes(exclude='string')) * 100).combine_first(vaccinations)[vaccinations.columns]
 
 def total_vaccination_rates(spreadsheet):
     vaccinations = vaccinations_dataframe(spreadsheet)
