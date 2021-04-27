@@ -278,7 +278,7 @@ def ltla(latest_daily_date, latest_weekly_date):
 
     # st.header("Specific local area")
     option = st.multiselect('Select local areas:', list(combined["LTLA Name"].values), ["Sutton", "Lewisham", "Solihull"])
-
+    columns_to_drop = ["LTLA Name", "UTLA Code", "UTLA Name", "Region Code (Administrative)", "Region Name (administrative)"]
     if len(option) > 0:
         local_area = combined.loc[combined["LTLA Name"].isin(option)].drop(["LTLA Code"], axis=1)
         local_area_absolute = vaccinations.loc[vaccinations["LTLA Name"].isin(option)].drop(["LTLA Code"], axis=1)
@@ -286,16 +286,17 @@ def ltla(latest_daily_date, latest_weekly_date):
 
         st.subheader("Percentage vaccinated by age group")
         left1, right1 = st.beta_columns(2)
-        with right1:
+        with right1:            
             flipped_local_area = local_area.T
             flipped_local_area.columns = local_area.loc[:, "LTLA Name"]
-            flipped_local_area.rename(index={"Under 50": "<50"}, inplace=True)
-            formatting = {column: "{:.2f}" for column in set(flipped_local_area.columns) - set(["LTLA Code", "LTLA Name"])}
-            st.table(flipped_local_area.drop(["LTLA Name"], axis=0).style.format(formatting))
+            flipped_local_area.rename(index={"Under 45": "<45"}, inplace=True)
+            formatting = {column: "{:.2f}" for column in set(flipped_local_area.columns) - set(columns_to_drop)}
+            print(flipped_local_area, formatting)
+            st.table(flipped_local_area.drop(columns_to_drop, axis=0).style.format(formatting))
 
         with left1:            
-            local_area.rename(columns={"Under 50": "<50"}, inplace=True)
-            melted_local_area = local_area.melt(value_vars=local_area.columns.drop(["LTLA Name"]), id_vars=["LTLA Name"])
+            local_area.rename(columns={"Under 45": "<45"}, inplace=True)
+            melted_local_area = local_area.melt(value_vars=local_area.columns.drop(columns_to_drop), id_vars=["LTLA Name"])
             melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
             melted_local_area.reset_index(level=0, inplace=True)
             chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
@@ -310,15 +311,15 @@ def ltla(latest_daily_date, latest_weekly_date):
 
         st.subheader("People vaccinated by age group")
         left2, right2 = st.beta_columns(2)
-        with right2:
+        with right2:            
             flipped_local_area_absolute = local_area_absolute.T
             flipped_local_area_absolute.columns = local_area_absolute.loc[:, "LTLA Name"]
-            flipped_local_area_absolute.rename(index={"Under 50": "<50"}, inplace=True)            
-            st.table(flipped_local_area_absolute.drop(["LTLA Name"], axis=0).style.format({column: "{:,}" for column in flipped_local_area_absolute.columns})) 
+            flipped_local_area_absolute.rename(index={"Under 45": "<45"}, inplace=True)            
+            st.table(flipped_local_area_absolute.drop(columns_to_drop, axis=0).style.format({column: "{:,}" for column in flipped_local_area_absolute.columns})) 
 
         with left2:            
-            local_area_absolute.rename(columns={"Under 50": "<50"}, inplace=True)
-            melted_local_area = local_area_absolute.melt(value_vars=local_area_absolute.columns.drop(["LTLA Name"]), id_vars=["LTLA Name"])
+            local_area_absolute.rename(columns={"Under 45": "<45"}, inplace=True)
+            melted_local_area = local_area_absolute.melt(value_vars=local_area_absolute.columns.drop(columns_to_drop), id_vars=["LTLA Name"])
             melted_local_area = melted_local_area.rename(columns={"value": "People Vaccinated", "variable": "Age"})    
             melted_local_area.reset_index(level=0, inplace=True)            
             chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
