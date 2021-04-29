@@ -233,12 +233,6 @@ def overview(latest_daily_date, latest_weekly_date):
     st.header("By Age Group")    
     st.table((total.drop(["Age"], axis=1).style
         .format({"Population": "{:,d}", "Vaccinations": "{:,d}", "%": "{:.2f}"})
-        # .bar(color='red', vmin=0, subset=['%'], align='left')
-        # .bar(color='lightgreen', vmin=0, subset=['Vaccinations'], align='left')
-        # .bar(color='lightblue', vmin=0, subset=['Population'], align='left')
-        # .set_table_styles({
-        #     'Population': [{'selector': '','props': [('width', '200px')]}],
-        #     '%': [{'selector': '', 'props': [('background-color', 'black')]}]})
     ))
 
     left, right = st.beta_columns(2)
@@ -259,24 +253,70 @@ def overview(latest_daily_date, latest_weekly_date):
         ).properties(title="People vaccinated")
         st.altair_chart(total_doses_chart2, use_container_width=True)    
 
+def region(latest_daily_date, latest_weekly_date):
+    st.title("Vaccines Administered by Region")
+
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    
+    vaccinations = sdt.vaccinations_dataframe(spreadsheet)    
+    population = sdt.population_dataframe(spreadsheet)
+    population = population.merge(vaccinations[["UTLA Name", "Region Name (administrative)", "LTLA Code"]], 
+                              left_on="LTLA Code", right_on="LTLA Code")
+
+    population_by_region = population.groupby(["Region Name (administrative)"]).sum()
+    population_by_region.insert(0, "Region", list(population_by_region.index))
+    population_by_region.loc[:, "Overall"] = population_by_region.sum(axis=1).astype("int64")
+
+    vaccinations_by_region = vaccinations.groupby(["Region Name (administrative)"]).sum()
+    vaccinations_by_region.insert(0, "Region", list(vaccinations_by_region.index))
+    vaccinations_by_region.loc[:, "Overall"] = vaccinations_by_region.sum(axis=1).astype("int64")
+
+    st.header("Total vaccines administered")
+    st.write((vaccinations_by_region.drop(["Region"], axis=1)
+        .sort_values(["Overall"], ascending=False)
+        .style.format({column: "{:,}" for column in vaccinations_by_region.select_dtypes(exclude='object').columns}) 
+        .hide_index()))
+
+    vaccination_rates_by_region = ((vaccinations_by_region
+        .select_dtypes(exclude='object')
+        .div(population_by_region.select_dtypes(exclude='object')) * 100)
+        .combine_first(vaccinations_by_region)[vaccinations_by_region.columns])
+
+    vaccination_rates_by_region.loc[:, "Overall"] = vaccinations_by_region["Overall"].div(population_by_region["Overall"]) * 100
+    vaccination_rates_by_region = vaccination_rates_by_region.convert_dtypes()
+
+    st.header("% of people vaccinated")
+    st.write((vaccination_rates_by_region.drop(["Region"], axis=1)
+        .sort_values(["Overall"], ascending=False)
+        .style
+        .format({ column: "{:.2f}" for column in vaccination_rates_by_region.select_dtypes(exclude='string').columns})
+        .hide_index()))
+
+    vaccination_rates_by_region = vaccination_rates_by_region.astype({
+        column: np.float32 
+        for column in vaccination_rates_by_region.drop(["Region"], axis=1).columns
+    })
+
+    age_groups = vaccination_rates_by_region.drop(["Region"], axis=1).columns
+    column = st.selectbox("Select age group", age_groups, index=len(age_groups)-1)
+
+    chart = (alt.Chart(vaccination_rates_by_region, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+                x=alt.X('Region'),
+                y=alt.Y(column, axis=alt.Axis(title='% vaccinated'), scale=alt.Scale(domain=[0, 100])),    
+                tooltip=[alt.Tooltip(column, format=",")])
+    .properties(height=500))
+
+    st.altair_chart(chart, use_container_width=True) 
+
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
-    # st.header("All local areas")
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     
     vaccinations = sdt.vaccinations_dataframe(spreadsheet)    
     population = sdt.population_dataframe(spreadsheet)    
     combined = dt.compute_all_vaccination_rates(vaccinations, population)
-    
-    # formatting = {column: "{:.2f}" for column in set(combined.columns) - set(["LTLA Code", "LTLA Name"])}
 
-    # st.dataframe(combined.drop(["LTLA Code"], axis=1).style.format(formatting))
-    # st.dataframe(vaccinations.drop(["LTLA Code"], axis=1))
-    # st.dataframe(population.drop(["LTLA Code"], axis=1))
-
-
-    # st.header("Specific local area")
     option = st.multiselect('Select local areas:', list(combined["LTLA Name"].values), ["Sutton", "Lewisham", "Solihull"])
     columns_to_drop = ["LTLA Name", "UTLA Code", "UTLA Name", "Region Code (Administrative)", "Region Name (administrative)"]
     if len(option) > 0:
@@ -361,7 +401,8 @@ PAGES = {
     "Overview": overview,
     "Daily Doses": daily,
     "Weekly Doses": weekly,
-    "Local Authority": ltla
+    "By Region": region,
+    "By Local Authority": ltla
 }
 
 alt.themes.enable('fivethirtyeight')
