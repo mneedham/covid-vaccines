@@ -16,6 +16,7 @@ vega = "*"
 altair-saver = "*"
 seaborn = "*"
 selenium = "*"
+vega-datasets = "*"
 
 [requires]
 python_version = "3.8"

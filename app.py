@@ -297,16 +297,21 @@ def region(latest_daily_date, latest_weekly_date):
         for column in vaccination_rates_by_region.drop(["Region"], axis=1).columns
     })
 
-    age_groups = vaccination_rates_by_region.drop(["Region"], axis=1).columns
-    column = st.selectbox("Select age group", age_groups, index=len(age_groups)-1)
+    left1, right1 = st.beta_columns([1,5])
 
-    chart = (alt.Chart(vaccination_rates_by_region, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
-                x=alt.X('Region'),
-                y=alt.Y(column, axis=alt.Axis(title='% vaccinated'), scale=alt.Scale(domain=[0, 100])),    
-                tooltip=[alt.Tooltip(column, format=",")])
-    .properties(height=500))
+    with left1:
+        age_groups = vaccination_rates_by_region.drop(["Region"], axis=1).columns
+        column = st.radio("Select age group", age_groups, index=len(age_groups)-1)
 
-    st.altair_chart(chart, use_container_width=True) 
+    with right1:
+
+        chart = (alt.Chart(vaccination_rates_by_region, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+                    x=alt.X('Region'),
+                    y=alt.Y(column, axis=alt.Axis(title='% vaccinated'), scale=alt.Scale(domain=[0, 100])),    
+                    tooltip=[alt.Tooltip(column, format=",")])
+        .properties(height=500))
+
+        st.altair_chart(chart, use_container_width=True) 
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
@@ -415,7 +420,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-04-29")
+latest_daily_date = parser.parse("2021-04-30")
 latest_weekly_date = parser.parse("2021-04-29")
 page(latest_daily_date, latest_weekly_date)
 
