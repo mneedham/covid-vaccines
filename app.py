@@ -287,7 +287,7 @@ def region(latest_daily_date, latest_weekly_date):
         strokeWidth=2
     ).encode(
         tooltip=["Region:N", f"{field}:Q"],
-        color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="turbo", domain=[0, 100]))
+        color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="darkmulti", domain=[0, 100]))
     ).transform_lookup(
         lookup='properties.EER13NM',
         from_=alt.LookupData(
