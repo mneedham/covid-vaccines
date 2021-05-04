@@ -271,47 +271,32 @@ def region(latest_daily_date, latest_weekly_date):
     vaccinations_by_region.insert(0, "Region", list(vaccinations_by_region.index))
     vaccinations_by_region.loc[:, "Overall"] = vaccinations_by_region.sum(axis=1).astype("int64")
 
-    st.header("Total vaccines administered")
-    st.write((vaccinations_by_region.drop(["Region"], axis=1)
-        .sort_values(["Overall"], ascending=False)
-        .style.format({column: "{:,}" for column in vaccinations_by_region.select_dtypes(exclude='object').columns}) 
-        .hide_index()))
-
     vaccination_rates_by_region = ((vaccinations_by_region
         .select_dtypes(exclude='object')
         .div(population_by_region.select_dtypes(exclude='object')) * 100)
         .combine_first(vaccinations_by_region)[vaccinations_by_region.columns])
 
     vaccination_rates_by_region.loc[:, "Overall"] = vaccinations_by_region["Overall"].div(population_by_region["Overall"]) * 100
-    vaccination_rates_by_region = vaccination_rates_by_region.convert_dtypes()
 
-    st.header("% of people vaccinated")
-    st.write((vaccination_rates_by_region.drop(["Region"], axis=1)
-        .sort_values(["Overall"], ascending=False)
-        .style
-        .format({ column: "{:.2f}" for column in vaccination_rates_by_region.select_dtypes(exclude='string').columns})
-        .hide_index()))
+    age_groups = vaccination_rates_by_region.drop(["Region"], axis=1).columns
+    field = st.selectbox("Select age group", age_groups, index=len(age_groups)-1)
 
-    vaccination_rates_by_region = vaccination_rates_by_region.astype({
-        column: np.float32 
-        for column in vaccination_rates_by_region.drop(["Region"], axis=1).columns
-    })
+    regions = alt.topo_feature("https://raw.githubusercontent.com/mneedham/covid-vaccines/main/data/topo_eer.json", 'eer')
+    background = alt.Chart(regions).mark_geoshape(
+        stroke='white',
+        strokeWidth=2
+    ).encode(
+        tooltip=["Region:N", f"{field}:Q"],
+        color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="turbo", domain=[0, 100]))
+    ).transform_lookup(
+        lookup='properties.EER13NM',
+        from_=alt.LookupData(
+            data=vaccination_rates_by_region, 
+            key='Region', 
+            fields=list(vaccination_rates_by_region.columns))
+    ).properties(height=500)
 
-    left1, right1 = st.beta_columns([1,5])
-
-    with left1:
-        age_groups = vaccination_rates_by_region.drop(["Region"], axis=1).columns
-        column = st.radio("Select age group", age_groups, index=len(age_groups)-1)
-
-    with right1:
-
-        chart = (alt.Chart(vaccination_rates_by_region, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
-                    x=alt.X('Region'),
-                    y=alt.Y(column, axis=alt.Axis(title='% vaccinated'), scale=alt.Scale(domain=[0, 100])),    
-                    tooltip=[alt.Tooltip(column, format=",")])
-        .properties(height=500))
-
-        st.altair_chart(chart, use_container_width=True) 
+    st.altair_chart(background, use_container_width=True) 
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
