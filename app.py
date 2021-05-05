@@ -286,17 +286,18 @@ def region(latest_daily_date, latest_weekly_date):
         stroke='white',
         strokeWidth=2
     ).encode(
-        tooltip=["Region:N", f"{field}:Q"],
-        color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="darkmulti", domain=[0, 100]))
+        tooltip=["Region:N", alt.Tooltip(f"{field}:Q", title="% vaccinated", format=".2f")],
+        # color="#efe",
+        color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="blues"), legend=alt.Legend(title=None))
     ).transform_lookup(
         lookup='properties.EER13NM',
         from_=alt.LookupData(
             data=vaccination_rates_by_region, 
             key='Region', 
             fields=list(vaccination_rates_by_region.columns))
-    ).properties(height=500)
+    ).properties(height=500, title=f"Vaccination Rates: {field}")
 
-    st.altair_chart(background, use_container_width=True) 
+    st.altair_chart(background) 
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
@@ -405,7 +406,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-05-04")
+latest_daily_date = parser.parse("2021-05-05")
 latest_weekly_date = parser.parse("2021-04-29")
 page(latest_daily_date, latest_weekly_date)
 
