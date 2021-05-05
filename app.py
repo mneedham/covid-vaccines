@@ -301,7 +301,7 @@ def region(latest_daily_date, latest_weekly_date):
                     fields=list(vaccination_rates_by_region.columns))
             ).properties(height=500, title=f"Vaccination Rates: {field}")
 
-            st.altair_chart(background) 
+            st.altair_chart(background,use_container_width=True) 
 
     with right:
         for field in [f for idx, f in enumerate(age_groups) if idx % 2 != 0]:
@@ -320,7 +320,7 @@ def region(latest_daily_date, latest_weekly_date):
                     fields=list(vaccination_rates_by_region.columns))
             ).properties(height=500, title=f"Vaccination Rates: {field}")
 
-            st.altair_chart(background) 
+            st.altair_chart(background, use_container_width=True) 
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
