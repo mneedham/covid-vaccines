@@ -278,26 +278,49 @@ def region(latest_daily_date, latest_weekly_date):
 
     vaccination_rates_by_region.loc[:, "Overall"] = vaccinations_by_region["Overall"].div(population_by_region["Overall"]) * 100
 
-    age_groups = vaccination_rates_by_region.drop(["Region"], axis=1).columns
-    field = st.selectbox("Select age group", age_groups, index=len(age_groups)-1)
+    age_groups = list(vaccination_rates_by_region.drop(["Region"], axis=1).columns)
 
     regions = alt.topo_feature("https://raw.githubusercontent.com/mneedham/covid-vaccines/main/data/topo_eer.json", 'eer')
-    background = alt.Chart(regions).mark_geoshape(
-        stroke='white',
-        strokeWidth=2
-    ).encode(
-        tooltip=["Region:N", alt.Tooltip(f"{field}:Q", title="% vaccinated", format=".2f")],
-        # color="#efe",
-        color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="blues"), legend=alt.Legend(title=None))
-    ).transform_lookup(
-        lookup='properties.EER13NM',
-        from_=alt.LookupData(
-            data=vaccination_rates_by_region, 
-            key='Region', 
-            fields=list(vaccination_rates_by_region.columns))
-    ).properties(height=500, title=f"Vaccination Rates: {field}")
 
-    st.altair_chart(background) 
+    left, right = st.beta_columns(2)
+    
+    with left:
+        for field in [f for idx, f in enumerate(age_groups) if idx % 2 == 0]:
+            background = alt.Chart(regions).mark_geoshape(
+                stroke='white',
+                strokeWidth=2
+            ).encode(
+                tooltip=["Region:N", alt.Tooltip(f"{field}:Q", title="% vaccinated", format=".2f")],
+                # color="#efe",
+                color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="blues", domain=[0,100]), legend=alt.Legend(title=None))
+            ).transform_lookup(
+                lookup='properties.EER13NM',
+                from_=alt.LookupData(
+                    data=vaccination_rates_by_region, 
+                    key='Region', 
+                    fields=list(vaccination_rates_by_region.columns))
+            ).properties(height=500, title=f"Vaccination Rates: {field}")
+
+            st.altair_chart(background) 
+
+    with right:
+        for field in [f for idx, f in enumerate(age_groups) if idx % 2 != 0]:
+            background = alt.Chart(regions).mark_geoshape(
+                stroke='white',
+                strokeWidth=2
+            ).encode(
+                tooltip=["Region:N", alt.Tooltip(f"{field}:Q", title="% vaccinated", format=".2f")],
+                # color="#efe",
+                color = alt.Color(f"{field}:Q", scale=alt.Scale(scheme="blues", domain=[0,100]), legend=alt.Legend(title=None))
+            ).transform_lookup(
+                lookup='properties.EER13NM',
+                from_=alt.LookupData(
+                    data=vaccination_rates_by_region, 
+                    key='Region', 
+                    fields=list(vaccination_rates_by_region.columns))
+            ).properties(height=500, title=f"Vaccination Rates: {field}")
+
+            st.altair_chart(background) 
 
 def ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
@@ -330,6 +353,7 @@ def ltla(latest_daily_date, latest_weekly_date):
             melted_local_area = local_area.melt(value_vars=local_area.columns.drop(columns_to_drop), id_vars=["LTLA Name"])
             melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
             melted_local_area.reset_index(level=0, inplace=True)
+            print(melted_local_area)
             chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
                 y=alt.Y('LTLA Name', sort=["index"], axis=alt.Axis(labels=True, ticks=False), title=None),
                 x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),
