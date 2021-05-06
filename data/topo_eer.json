@@ -15,7 +15,9 @@
                "properties":{
                   "EER13CD":"E15000001",
                   "EER13CDO":"01",
-                  "EER13NM":"North East"
+                  "EER13NM":"North East",
+                  "centroid_lat": 55.59235547143634, 
+                  "centroid_lon": -2.807297982517407
                },
                "id":"E15000001",
                "arcs":[
@@ -176,7 +178,9 @@
                "properties":{
                   "EER13CD":"E15000002",
                   "EER13CDO":"02",
-                  "EER13NM":"North West"
+                  "EER13NM":"North West",
+                  "centroid_lat": 54.021615241748435, 
+                  "centroid_lan": -3.2131295770938357
                },
                "id":"E15000002",
                "arcs":[
@@ -332,7 +336,9 @@
                "properties":{
                   "EER13CD":"E15000003",
                   "EER13CDO":"03",
-                  "EER13NM":"Yorkshire and The Humber"
+                  "EER13NM":"Yorkshire and The Humber",
+                  "centroid_lat": 54.754732963603324, 
+                  "centroid_lan": -2.1843212804208756
                },
                "id":"E15000003",
                "arcs":[
