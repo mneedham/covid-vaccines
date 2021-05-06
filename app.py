@@ -73,7 +73,6 @@ def daily(latest_daily_date, latest_weekly_date):
 
 
     left2, right2 = st.beta_columns(2)
-    print("melted_daily_doses", melted_daily_doses.loc[melted_daily_doses.dose == "totalDoses"])
     with left2:    
         st.header("7-day rolling average")
         rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
@@ -240,7 +239,6 @@ def overview(latest_daily_date, latest_weekly_date):
     ], index = ["Overall"])
 
     total_overall = total.append(to_append)
-    print(total)    
     st.table((total_overall.drop(["Age"], axis=1).style
         .format({"Population": "{:,d}", "Vaccinations": "{:,d}", "%": "{:.2f}"})
     ))
@@ -360,7 +358,6 @@ def my_ltla(latest_daily_date, latest_weekly_date):
             flipped_local_area.columns = local_area.loc[:, "LTLA Name"]
             flipped_local_area.rename(index={"Under 45": "<45"}, inplace=True)
             formatting = {column: "{:.2f}" for column in set(flipped_local_area.columns) - set(columns_to_drop)}
-            print(flipped_local_area, formatting)
             st.table(flipped_local_area.drop(columns_to_drop, axis=0).style.format(formatting))
 
         with left1:            
@@ -368,7 +365,6 @@ def my_ltla(latest_daily_date, latest_weekly_date):
             melted_local_area = local_area.melt(value_vars=local_area.columns.drop(columns_to_drop), id_vars=["LTLA Name"])
             melted_local_area = melted_local_area.rename(columns={"value": "Percentage", "variable": "Age"})    
             melted_local_area.reset_index(level=0, inplace=True)
-            print(melted_local_area)
             chart = alt.Chart(melted_local_area, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
                 y=alt.Y('LTLA Name', sort=["index"], axis=alt.Axis(labels=True, ticks=False), title=None),
                 x=alt.X('Percentage', scale=alt.Scale(domain=[0, 100])),

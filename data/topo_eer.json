@@ -530,7 +530,9 @@
                "properties":{
                   "EER13CD":"E15000006",
                   "EER13CDO":"06",
-                  "EER13NM":"East of England"
+                  "EER13NM":"East of England",
+                  "centroid_lat": 52.44760244481755, 
+                  "centroid_lon": 0.285452176081282
                },
                "id":"E15000006",
                "arcs":[
