@@ -477,8 +477,8 @@
                   "EER13CD":"E15000005",
                   "EER13CDO":"05",
                   "EER13NM":"West Midlands",
-                  "centroid_lat": 52.3906395218242, 
-                  "centroid_lon": -2.3350440340279888
+                  "centroid_lat": 52.44056660708517,
+                  "centroid_lon": -2.2938866958199395
                },
                "id":"E15000005",
                "arcs":[
@@ -1131,8 +1131,8 @@
                   "EER13CD":"E15000007",
                   "EER13CDO":"07",
                   "EER13NM":"London", 
-                  "centroid_lat":51.59055232748858,
-                  "centroid_lon":0.09592246002317394
+                  "centroid_lat":51.59202416240296, 
+                  "centroid_lon":0.039705771061786285
                },
                "id":"E15000007",
                "arcs":[
@@ -1482,8 +1482,8 @@
                   "EER13CD":"E15000009",
                   "EER13CDO":"09",
                   "EER13NM":"South West",
-                  "centroid_lat":51.22116928853894,
-                  "centroid_lon":-2.5790989092247645
+                  "centroid_lat":51.10719365075182,
+                  "centroid_lon":-2.5794843351820846
                },
                "id":"E15000009",
                "arcs":[
