@@ -230,8 +230,18 @@ def overview(latest_daily_date, latest_weekly_date):
     total.loc[:, "%"] = (total.loc[:, "%"] * 100)
     # total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
     
-    st.header("By Age Group")    
-    st.table((total.drop(["Age"], axis=1).style
+    st.header("By Age Group")
+    to_append = pd.DataFrame([{
+        "Vaccinations": total["Vaccinations"].sum().astype("int64"), 
+        "Population": total["Population"].sum().astype("int64"),
+        "Age": "Overall",
+        "%": 100 * (total["Vaccinations"].sum().astype("int64") / total["Population"].sum().astype("int64"))
+        }
+    ], index = ["Overall"])
+
+    total_overall = total.append(to_append)
+    print(total)    
+    st.table((total_overall.drop(["Age"], axis=1).style
         .format({"Population": "{:,d}", "Vaccinations": "{:,d}", "%": "{:.2f}"})
     ))
 
@@ -255,7 +265,8 @@ def overview(latest_daily_date, latest_weekly_date):
 
 
 def create_region_map(regions, vaccination_rates_by_region, field):
-    return alt.Chart(regions).mark_geoshape(
+    # schemes - https://vega.github.io/vega/docs/schemes/#reference
+    chart = alt.Chart(regions).mark_geoshape(
                 stroke='white',
                 strokeWidth=2
             ).encode(
@@ -269,6 +280,19 @@ def create_region_map(regions, vaccination_rates_by_region, field):
                     key='Region', 
                     fields=list(vaccination_rates_by_region.columns))
             ).properties(height=500, title=f"Vaccination Rates: {field}")
+
+    labels = alt.Chart(regions).mark_text(baseline='top').properties(
+        width=400,
+        height=400
+     ).encode(
+         longitude='properties.centroid_lon:Q',
+         latitude='properties.centroid_lat:Q',
+         text='properties.EER13NM:O',
+         size=alt.value(8),
+         opacity=alt.value(1)
+     )
+
+    return chart + labels
 
 def region(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Region")
@@ -299,19 +323,20 @@ def region(latest_daily_date, latest_weekly_date):
 
     regions = alt.topo_feature("https://raw.githubusercontent.com/mneedham/covid-vaccines/main/data/topo_eer.json", 'eer')
 
-    left, right = st.beta_columns(2)
-    
+
+    left, right = st.beta_columns(2)    
     with left:
         for field in [f for idx, f in enumerate(age_groups) if idx % 2 == 0]:
-            background = create_region_map(regions, vaccination_rates_by_region, field)
-            st.altair_chart(background,use_container_width=True) 
+            with st.spinner("Loading map..."):
+                background = create_region_map(regions, vaccination_rates_by_region, field)
+                st.altair_chart(background,use_container_width=True) 
 
     with right:
         for field in [f for idx, f in enumerate(age_groups) if idx % 2 != 0]:
             background = create_region_map(regions, vaccination_rates_by_region, field)
             st.altair_chart(background, use_container_width=True) 
 
-def ltla(latest_daily_date, latest_weekly_date):
+def my_ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
@@ -406,7 +431,7 @@ PAGES = {
     "Daily Doses": daily,
     "Weekly Doses": weekly,
     "By Region": region,
-    "By Local Authority": ltla
+    "My Local Authority": my_ltla
 }
 
 alt.themes.enable('fivethirtyeight')
@@ -419,8 +444,8 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-05-05")
-latest_weekly_date = parser.parse("2021-04-29")
+latest_daily_date = parser.parse("2021-05-06")
+latest_weekly_date = parser.parse("2021-05-06")
 page(latest_daily_date, latest_weekly_date)
 
 st.markdown(f"""- - -
