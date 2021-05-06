@@ -288,8 +288,8 @@ def create_region_map(regions, vaccination_rates_by_region, field):
          longitude='properties.centroid_lon:Q',
          latitude='properties.centroid_lat:Q',
          text='properties.EER13NM:O',
-         size=alt.value(8),
-         opacity=alt.value(1)
+         size=alt.value(10),
+         opacity=alt.value(100)
      )
 
     return chart + labels
