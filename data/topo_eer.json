@@ -384,7 +384,9 @@
                "properties":{
                   "EER13CD":"E15000004",
                   "EER13CDO":"04",
-                  "EER13NM":"East Midlands"
+                  "EER13NM":"East Midlands",
+                  "centroid_lat": 52.8163727543805, 
+                  "centroid_lon": -1.0732405728144272
                },
                "id":"E15000004",
                "arcs":[
@@ -468,7 +470,9 @@
                "properties":{
                   "EER13CD":"E15000005",
                   "EER13CDO":"05",
-                  "EER13NM":"West Midlands"
+                  "EER13NM":"West Midlands",
+                  "centroid_lat": 52.3906395218242, 
+                  "centroid_lon": -2.3350440340279888
                },
                "id":"E15000005",
                "arcs":[
@@ -531,8 +535,8 @@
                   "EER13CD":"E15000006",
                   "EER13CDO":"06",
                   "EER13NM":"East of England",
-                  "centroid_lat": 52.44760244481755, 
-                  "centroid_lon": 0.285452176081282
+                  "centroid_lat": 52.512786632071546, 
+                  "centroid_lon": 0.5006678808515167
                },
                "id":"E15000006",
                "arcs":[
