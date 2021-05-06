@@ -1118,9 +1118,9 @@
                "properties":{
                   "EER13CD":"E15000007",
                   "EER13CDO":"07",
-                  "EER13NM":"London",
-                  "centroid_lat":51.58788870532886,
-                  "centroid_lon":0.1288386480312806
+                  "EER13NM":"London", 
+                  "centroid_lat":51.59055232748858,
+                  "centroid_lon":0.09592246002317394
                },
                "id":"E15000007",
                "arcs":[
