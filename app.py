@@ -266,6 +266,7 @@ def overview(latest_daily_date, latest_weekly_date):
 
 def create_region_map(regions, vaccination_rates_by_region, field):
     # schemes - https://vega.github.io/vega/docs/schemes/#reference
+    # chart = alt.Chart(regions, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_geoshape(
     chart = alt.Chart(regions).mark_geoshape(
                 stroke='white',
                 strokeWidth=2
@@ -281,7 +282,7 @@ def create_region_map(regions, vaccination_rates_by_region, field):
                     fields=list(vaccination_rates_by_region.columns))
             ).properties(height=500, title=f"Vaccination Rates: {field}")
 
-    labels = alt.Chart(regions).mark_text(baseline='top').properties(
+    labels = alt.Chart(regions).mark_text(baseline='top', color='red', fontWeight=600).properties(
         width=400,
         height=400
      ).encode(
