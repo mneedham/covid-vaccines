@@ -16,8 +16,8 @@
                   "EER13CD":"E15000001",
                   "EER13CDO":"01",
                   "EER13NM":"North East",
-                  "centroid_lat": 55.33335251167981, 
-                  "centroid_lon": -2.6860211973302657
+                  "centroid_lat": 55.3628099075306, 
+                  "centroid_lon": -2.3503755167958107
                },
                "id":"E15000001",
                "arcs":[
@@ -179,8 +179,8 @@
                   "EER13CD":"E15000002",
                   "EER13CDO":"02",
                   "EER13NM":"North West",
-                  "centroid_lat": 55.33335251167981, 
-                  "centroid_lon": -2.6860211973302657
+                  "centroid_lat": 54.81917225213833, 
+                  "centroid_lon": -3.1505617248034032
                },
                "id":"E15000002",
                "arcs":[
@@ -337,8 +337,8 @@
                   "EER13CD":"E15000003",
                   "EER13CDO":"03",
                   "EER13NM":"Yorkshire and The Humber",
-                  "centroid_lat": 54.754732963603324, 
-                  "centroid_lan": -2.1843212804208756
+                  "centroid_lat": 54.27119034897835, 
+                  "centroid_lon": -0.6245019666881773
                },
                "id":"E15000003",
                "arcs":[
@@ -391,8 +391,8 @@
                   "EER13CD":"E15000004",
                   "EER13CDO":"04",
                   "EER13NM":"East Midlands",
-                  "centroid_lat": 52.8163727543805, 
-                  "centroid_lon": -1.0732405728144272
+                  "centroid_lat": 53.01592565220345, 
+                  "centroid_lon": -0.8699758772647362
                },
                "id":"E15000004",
                "arcs":[
@@ -477,8 +477,8 @@
                   "EER13CD":"E15000005",
                   "EER13CDO":"05",
                   "EER13NM":"West Midlands",
-                  "centroid_lat": 52.44056660708517,
-                  "centroid_lon": -2.2938866958199395
+                  "centroid_lat": 52.548375670452174, 
+                  "centroid_lon": -2.1333686345295346
                },
                "id":"E15000005",
                "arcs":[
@@ -541,8 +541,8 @@
                   "EER13CD":"E15000006",
                   "EER13CDO":"06",
                   "EER13NM":"East of England",
-                  "centroid_lat": 52.512786632071546, 
-                  "centroid_lon": 0.5006678808515167
+                  "centroid_lat": 52.31837025332876, 
+                  "centroid_lon": 0.5069789838648597
                },
                "id":"E15000006",
                "arcs":[
@@ -1131,8 +1131,8 @@
                   "EER13CD":"E15000007",
                   "EER13CDO":"07",
                   "EER13NM":"London", 
-                  "centroid_lat":51.59202416240296, 
-                  "centroid_lon":0.039705771061786285
+                  "centroid_lat":51.60242850384478,  
+                  "centroid_lon":-0.20785503873928976
                },
                "id":"E15000007",
                "arcs":[

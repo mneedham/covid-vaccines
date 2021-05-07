@@ -280,7 +280,7 @@ def create_region_map(regions, vaccination_rates_by_region, field):
                     fields=list(vaccination_rates_by_region.columns))
             ).properties(height=500, title=f"Vaccination Rates: {field}")
 
-    labels = alt.Chart(regions).mark_text(baseline='top', color='red', fontWeight=600).properties(
+    labels = alt.Chart(regions).mark_text(baseline='top', color='#E67E22', fontWeight=800).properties(
         width=400,
         height=400
      ).encode(
@@ -291,7 +291,7 @@ def create_region_map(regions, vaccination_rates_by_region, field):
          opacity=alt.value(100)
      )
 
-    return chart + labels
+    return alt.layer(chart, labels, padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
 
 def region(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Region")
@@ -321,22 +321,85 @@ def region(latest_daily_date, latest_weekly_date):
     age_groups = list(vaccination_rates_by_region.drop(["Region"], axis=1).columns)
 
     regions = alt.topo_feature("https://raw.githubusercontent.com/mneedham/covid-vaccines/main/data/topo_eer.json", 'eer')
+    # regions = alt.topo_feature("http://localhost:8000/data/topo_eer.json", 'eer')
 
 
     left, right = st.beta_columns(2)    
     with left:
-        for field in [f for idx, f in enumerate(age_groups) if idx % 2 == 0][:1]:
+        for field in [f for idx, f in enumerate(age_groups) if idx % 2 == 0]:
             with st.spinner("Loading map..."):
                 background = create_region_map(regions, vaccination_rates_by_region, field)
                 st.altair_chart(background,use_container_width=True) 
 
-    # with right:
-    #     for field in [f for idx, f in enumerate(age_groups) if idx % 2 != 0]:
-    #         background = create_region_map(regions, vaccination_rates_by_region, field)
-    #         st.altair_chart(background, use_container_width=True) 
+    with right:
+        for field in [f for idx, f in enumerate(age_groups) if idx % 2 != 0]:
+            background = create_region_map(regions, vaccination_rates_by_region, field)
+            st.altair_chart(background, use_container_width=True) 
+
+def by_ltla(latest_daily_date, latest_weekly_date):
+    st.title("Vaccines Administered by Lower Tier Local Authority")    
+
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    vaccinations = sdt.vaccinations_dataframe(spreadsheet)    
+    population = sdt.population_dataframe(spreadsheet)    
+    combined = dt.compute_all_vaccination_rates(vaccinations, population)
+    combined.loc[:, "Overall"] = 100 * (vaccinations.sum(axis=1).astype("int64") / population.sum(axis=1).astype("int64"))
+
+    left,right = st.beta_columns(2)
+    with left:
+        st.header("Overall vaccination rate by region")
+        chart = alt.Chart(combined, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_boxplot().encode(
+            y='Region Name (administrative):O',
+            x=alt.Y('Overall:Q',scale = alt.Scale(domain=[0,100]))
+        ).properties(height=500)
+        st.altair_chart(chart, use_container_width=True)
+
+    with right:
+        st.header("Population by region")
+        population_with_regions = population.copy()
+        population_with_regions = population_with_regions.merge(vaccinations[["UTLA Name", "Region Name (administrative)", "LTLA Code"]], 
+                              left_on="LTLA Code", right_on="LTLA Code")
+        population_with_regions.loc[:, "Overall"] = population_with_regions.sum(axis=1)
+        # st.write(population_with_regions)
+        chart = alt.Chart(population_with_regions, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).transform_aggregate(
+            sum_overall='sum(Overall)',
+            sum_under_45='sum(Under 45)',
+            groupby=['Region Name (administrative)']
+        ).transform_calculate(
+            under45s='100 * (datum.sum_under_45 / datum.sum_overall)'
+        ).mark_bar(color="#2E4053").encode(
+            x='Region Name (administrative)',
+            tooltip=["under45s:Q"],
+            y=alt.Y('under45s:Q', title="Population under 45")
+        ).properties(height=500)
+        st.altair_chart(chart, use_container_width=True)
+
+    left2, right2 = st.beta_columns(2)
+
+    with left2:
+        st.header("Least vaccinated areas")
+        worst = combined.sort_values(["Overall"]).head(20)
+        chart = alt.Chart(worst.sort_values(["Overall"]), padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+                x=alt.Y('LTLA Name:O', sort='y'),
+                color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='top')),
+                tooltip=["LTLA Name", "Overall"],
+                y=alt.X('Overall:Q',scale = alt.Scale(domain=[0,100]))
+            ).properties(height=500, title="Least vaccinated areas")
+        st.altair_chart(chart, use_container_width=True)
+    
+    with right2:
+        st.header("Most vaccinated areas")
+        best = combined.sort_values(["Overall"], ascending=False).head(250)
+        chart = alt.Chart(best.sort_values(["Overall"]), padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
+                x=alt.Y('LTLA Name:O', sort='-y'),
+                color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='top', columns=4)),
+                tooltip=["LTLA Name", "Overall"],
+                y=alt.X('Overall:Q',scale = alt.Scale(domain=[0,100]))
+            ).properties(height=500, title="Most vaccinated areas")
+        st.altair_chart(chart, use_container_width=True)
 
 def my_ltla(latest_daily_date, latest_weekly_date):
-    st.title("Vaccines Administered by Lower Tier Local Authority")    
+    st.title("Vaccines Administered by selected Lower Tier Local Authorities")    
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     
@@ -428,6 +491,7 @@ PAGES = {
     "Daily Doses": daily,
     "Weekly Doses": weekly,
     "By Region": region,
+    "By Local Authority": by_ltla,
     "My Local Authority": my_ltla
 }
 
