@@ -389,7 +389,7 @@ def by_ltla(latest_daily_date, latest_weekly_date):
     
     with right2:
         st.header("Most vaccinated areas")
-        best = combined.sort_values(["Overall"], ascending=False).head(250)
+        best = combined.sort_values(["Overall"], ascending=False).head(200)
         chart = alt.Chart(best.sort_values(["Overall"]), padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_bar().encode(
                 x=alt.Y('LTLA Name:O', sort='-y'),
                 color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='top', columns=4)),
@@ -505,7 +505,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-05-06")
+latest_daily_date = parser.parse("2021-05-07")
 latest_weekly_date = parser.parse("2021-05-06")
 page(latest_daily_date, latest_weekly_date)
 
