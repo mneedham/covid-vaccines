@@ -71,19 +71,19 @@ def daily(latest_daily_date, latest_weekly_date):
 
         st.altair_chart(rolling_average_chart, use_container_width=True)
 
-
     left2, right2 = st.beta_columns(2)
     with left2:    
         st.header("7-day rolling average")
-        rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)], padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
+        rolling_average_chart = (alt.Chart(melted_daily_doses.loc[~pd.isna(melted_daily_doses.rollingAverage)]).mark_line(point=True).encode(
             x=alt.X("date", axis=alt.Axis(values=weekends)),
             tooltip=[alt.Tooltip('rollingAverage', format=",.0f"), "date"],
             y=alt.Y('rollingAverage', axis=alt.Axis(title='Doses')),
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
             )
         .properties(height=500))
-
-        st.altair_chart(rolling_average_chart, use_container_width=True)
+        bank_holidays = ["2021-04-02", "2021-04-05", "2021-05-03"]
+        line = alt.Chart(pd.DataFrame({'x': bank_holidays})).mark_rule(strokeDash=[10,10], color="#85929e").encode(x='x')
+        st.altair_chart(alt.layer(rolling_average_chart, line, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}), use_container_width=True)
 
     with right2:
         st.header("% of first doses by day")
@@ -329,7 +329,7 @@ def region(latest_daily_date, latest_weekly_date):
         for field in [f for idx, f in enumerate(age_groups) if idx % 2 == 0]:
             with st.spinner("Loading map..."):
                 background = create_region_map(regions, vaccination_rates_by_region, field)
-                st.altair_chart(background,use_container_width=True) 
+                st.altair_chart(background, use_container_width=True)
 
     with right:
         for field in [f for idx, f in enumerate(age_groups) if idx % 2 != 0]:
@@ -363,14 +363,14 @@ def by_ltla(latest_daily_date, latest_weekly_date):
         # st.write(population_with_regions)
         chart = alt.Chart(population_with_regions, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).transform_aggregate(
             sum_overall='sum(Overall)',
-            sum_under_45='sum(Under 45)',
+            sum_under_45='sum(Under 40)',
             groupby=['Region Name (administrative)']
         ).transform_calculate(
             under45s='100 * (datum.sum_under_45 / datum.sum_overall)'
         ).mark_bar(color="#2E4053").encode(
             x='Region Name (administrative)',
             tooltip=["under45s:Q"],
-            y=alt.Y('under45s:Q', title="Population under 45")
+            y=alt.Y('under45s:Q', title="Population under 40")
         ).properties(height=500)
         st.altair_chart(chart, use_container_width=True)
 
