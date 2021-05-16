@@ -505,8 +505,8 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-05-14")
-latest_weekly_date = parser.parse("2021-05-06")
+latest_daily_date = parser.parse("2021-05-16")
+latest_weekly_date = parser.parse("2021-05-13")
 page(latest_daily_date, latest_weekly_date)
 
 st.markdown(f"""- - -
