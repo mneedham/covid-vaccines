@@ -308,7 +308,6 @@ def ethnicity(latest_daily_date, latest_weekly_date):
 
     # columns = ["District", "White%", "Overall", "Region Name (administrative)"
     ethnicities_vaccinations = pd.merge(ethnicities, combined, left_on=["District"], right_on=["LTLA Name"])
-
     left, right = st.beta_columns(2)
     with left:
         st.header("White % vs Overall Vaccination Rate")
@@ -316,7 +315,7 @@ def ethnicity(latest_daily_date, latest_weekly_date):
             x=alt.X('White%'),
             y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
             color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
-            tooltip=['District', 'White%', 'Overall']
+            tooltip=['District', 'Overall', 'White%', 'Asian%', 'Mixed%', 'Black%']
         ).properties(height=500)
         regression_line = (chart.transform_regression('White%', 'Overall')
             .mark_line(strokeDash=[10,10])
@@ -329,7 +328,7 @@ def ethnicity(latest_daily_date, latest_weekly_date):
             x=alt.X('Asian%'),
             y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
             color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
-            tooltip=['District', 'Asian%', 'Overall']
+            tooltip=['District', 'Overall', 'Asian%', 'White%', 'Mixed%', 'Black%']
         ).properties(height=500)
         regression_line = (chart.transform_regression('Asian%', 'Overall')
                            .mark_line(strokeDash=[10, 10])
@@ -343,7 +342,7 @@ def ethnicity(latest_daily_date, latest_weekly_date):
             x=alt.X('Black%'),
             y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
             color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
-            tooltip=['District', 'Black%', 'Overall']
+            tooltip=['District', 'Overall', 'Black%', 'White%', 'Asian%', 'Mixed%']
         ).properties(height=500)
         regression_line = (chart.transform_regression('Black%', 'Overall')
             .mark_line(strokeDash=[10,10])
@@ -356,9 +355,24 @@ def ethnicity(latest_daily_date, latest_weekly_date):
             x=alt.X('Mixed%'),
             y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
             color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
-            tooltip=['District', 'Mixed%', 'Overall']
+            tooltip=['District', 'Overall', 'Mixed%', 'White%', 'Black%', 'Asian%']
         ).properties(height=500)
         regression_line = (chart.transform_regression('Mixed%', 'Overall')
+                           .mark_line(strokeDash=[10, 10])
+                           .encode(color=alt.value("#000000")))
+        st.altair_chart(chart + regression_line, use_container_width=True)
+
+
+    left2, right2 = st.beta_columns(2)
+    with left2:
+        st.header("Arab and other % vs Overall Vaccination Rate")
+        chart = alt.Chart(ethnicities_vaccinations).mark_circle(size=60).encode(
+            x=alt.X('Arab& other %'),
+            y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
+            color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
+            tooltip=['District', 'Overall', 'Arab& other %', 'Mixed%', 'White%', 'Black%', 'Asian%']
+        ).properties(height=500)
+        regression_line = (chart.transform_regression('Arab& other %', 'Overall')
                            .mark_line(strokeDash=[10, 10])
                            .encode(color=alt.value("#000000")))
         st.altair_chart(chart + regression_line, use_container_width=True)
@@ -588,6 +602,7 @@ The data used in this app comes from:
 Latest data as of {custom_strftime('{S} %B %Y', latest_weekly_date)}
 * [coronavirus.data.gov.uk/details/vaccinations](https://coronavirus.data.gov.uk/details/vaccinations) for total daily vaccinations  
 Latest data as of {custom_strftime('{S} %B %Y', latest_daily_date)}
+* [en.wikipedia.org/wiki/List_of_English_districts_by_ethnicity](https://en.wikipedia.org/wiki/List_of_English_districts_by_ethnicity) for 2011 census ethnicities
 """)
 
 # Scottish data - https://www.opendata.nhs.scot/dataset/covid-19-vaccination-in-scotland/resource/d5ffffc0-f6f3-4b76-8f38-71ccfd7747a4?inner_span=True
