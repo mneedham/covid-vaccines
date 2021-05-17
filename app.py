@@ -293,15 +293,86 @@ def create_region_map(regions, vaccination_rates_by_region, field):
 
     return alt.layer(chart, labels, padding={"left": 10, "top": 10, "right": 10, "bottom": 10})
 
+
+def ethnicity(latest_daily_date, latest_weekly_date):
+    st.title("Vaccines Administered by Region/Ethnicity")
+
+    ethnicities = pd.read_csv("data/ethnicities.csv")
+
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    vaccinations = sdt.vaccinations_dataframe(spreadsheet)
+    population = sdt.population_dataframe(spreadsheet)
+    combined = dt.compute_all_vaccination_rates(vaccinations, population)
+    combined.loc[:, "Overall"] = 100 * (
+                vaccinations.sum(axis=1).astype("int64") / population.sum(axis=1).astype("int64"))
+
+    # columns = ["District", "White%", "Overall", "Region Name (administrative)"
+    ethnicities_vaccinations = pd.merge(ethnicities, combined, left_on=["District"], right_on=["LTLA Name"])
+
+    left, right = st.beta_columns(2)
+    with left:
+        st.header("White % vs Overall Vaccination Rate")
+        chart = alt.Chart(ethnicities_vaccinations).mark_circle(size=60).encode(
+            x=alt.X('White%'),
+            y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
+            color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
+            tooltip=['District', 'White%', 'Overall']
+        ).properties(height=500)
+        regression_line = (chart.transform_regression('White%', 'Overall')
+            .mark_line(strokeDash=[10,10])
+            .encode(color=alt.value("#000000")))
+        st.altair_chart(chart + regression_line, use_container_width=True)
+
+    with right:
+        st.header("Asian % vs Overall Vaccination Rate")
+        chart = alt.Chart(ethnicities_vaccinations).mark_circle(size=60).encode(
+            x=alt.X('Asian%'),
+            y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
+            color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
+            tooltip=['District', 'Asian%', 'Overall']
+        ).properties(height=500)
+        regression_line = (chart.transform_regression('Asian%', 'Overall')
+                           .mark_line(strokeDash=[10, 10])
+                           .encode(color=alt.value("#000000")))
+        st.altair_chart(chart + regression_line, use_container_width=True)
+
+    left1, right1 = st.beta_columns(2)
+    with left1:
+        st.header("Black % vs Overall Vaccination Rate")
+        chart = alt.Chart(ethnicities_vaccinations).mark_circle(size=60).encode(
+            x=alt.X('Black%'),
+            y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
+            color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
+            tooltip=['District', 'Black%', 'Overall']
+        ).properties(height=500)
+        regression_line = (chart.transform_regression('Black%', 'Overall')
+            .mark_line(strokeDash=[10,10])
+            .encode(color=alt.value("#000000")))
+        st.altair_chart(chart + regression_line, use_container_width=True)
+
+    with right1:
+        st.header("Mixed % vs Overall Vaccination Rate")
+        chart = alt.Chart(ethnicities_vaccinations).mark_circle(size=60).encode(
+            x=alt.X('Mixed%'),
+            y=alt.Y('Overall', scale=alt.Scale(domain=[0, 100])),
+            color=alt.Color('Region Name (administrative)', legend=alt.Legend(orient='bottom', columns=4)),
+            tooltip=['District', 'Mixed%', 'Overall']
+        ).properties(height=500)
+        regression_line = (chart.transform_regression('Mixed%', 'Overall')
+                           .mark_line(strokeDash=[10, 10])
+                           .encode(color=alt.value("#000000")))
+        st.altair_chart(chart + regression_line, use_container_width=True)
+
+
 def region(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Region")
 
     spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
     
-    vaccinations = sdt.vaccinations_dataframe(spreadsheet)    
+    vaccinations = sdt.vaccinations_dataframe(spreadsheet)
     population = sdt.population_dataframe(spreadsheet)
-    population = population.merge(vaccinations[["UTLA Name", "Region Name (administrative)", "LTLA Code"]], 
-                              left_on="LTLA Code", right_on="LTLA Code")
+    population = population.merge(vaccinations[["UTLA Name", "Region Name (administrative)", "LTLA Code"]],
+                                  left_on="LTLA Code", right_on="LTLA Code")
 
     population_by_region = population.groupby(["Region Name (administrative)"]).sum()
     population_by_region.insert(0, "Region", list(population_by_region.index))
@@ -491,6 +562,7 @@ PAGES = {
     "Daily Doses": daily,
     "Weekly Doses": weekly,
     "By Region": region,
+    "By Ethnicity": ethnicity,
     "By Local Authority": by_ltla,
     "My Local Authority": my_ltla
 }
@@ -505,7 +577,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-05-16")
+latest_daily_date = parser.parse("2021-05-17")
 latest_weekly_date = parser.parse("2021-05-13")
 page(latest_daily_date, latest_weekly_date)
 
