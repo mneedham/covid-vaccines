@@ -81,7 +81,7 @@ def daily(latest_daily_date, latest_weekly_date):
             color=alt.Color('dose', legend=alt.Legend(orient='bottom'))
             )
         .properties(height=500))
-        bank_holidays = ["2021-04-02", "2021-04-05", "2021-05-03"]
+        bank_holidays = ["2021-04-02", "2021-04-05", "2021-05-03", "2021-05-31"]
         line = alt.Chart(pd.DataFrame({'x': bank_holidays})).mark_rule(strokeDash=[10,10], color="#85929e").encode(x='x')
         st.altair_chart(alt.layer(rolling_average_chart, line, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}), use_container_width=True)
 
@@ -591,8 +591,8 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-05-29")
-latest_weekly_date = parser.parse("2021-05-20")
+latest_daily_date = parser.parse("2021-06-01")
+latest_weekly_date = parser.parse("2021-05-27")
 page(latest_daily_date, latest_weekly_date)
 
 st.markdown(f"""- - -
