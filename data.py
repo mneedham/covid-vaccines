@@ -26,7 +26,7 @@ def create_vaccines_dataframe(latest_date):
 
 
 def vaccinations_dataframe(spreadsheet):
-    vaccinations = pd.read_excel(spreadsheet, "LTLA", usecols="B:Q")
+    vaccinations = pd.read_excel(spreadsheet, "LTLA", usecols="B:S")
     columns = np.concatenate((vaccinations.loc[10, :][:6].values, vaccinations.loc[11, :][6:].values), axis=None)
     vaccinations = vaccinations.loc[14:327, ]
     vaccinations.columns = columns
@@ -35,12 +35,12 @@ def vaccinations_dataframe(spreadsheet):
 
 
 def population_dataframe(spreadsheet):
-    population = pd.read_excel(spreadsheet, "Population estimates (NIMS)", usecols="D:P")
+    population = pd.read_excel(spreadsheet, "Population estimates (NIMS)", usecols="D:R")
     population_columns = np.concatenate((population.loc[10, :][:2], population.loc[11, :][2:]), axis=None)
     population = population.loc[14:327, ]
     population.columns = population_columns
-    population.insert(loc=2, column="Under 40", value=population["Under 16"] + population["16-39"])
-    population = population.drop(["Under 16", "16-39"], axis=1)
+    population.insert(loc=2, column="Under 30", value=population["Under 16"] + population["16-29"])
+    population = population.drop(["Under 16", "16-29"], axis=1)
     population = population.convert_dtypes()
     return population
 

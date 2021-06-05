@@ -224,7 +224,7 @@ def overview(latest_daily_date, latest_weekly_date):
         ).properties(title='Cumulative doses', height=500)
         st.altair_chart(cumulative_first_doses_chart, use_container_width=True)
 
-    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%d-%B-%Y')}.xlsx"
     total = dt.total_vaccination_rates(spreadsheet)
     total.loc[:, "%"] = (total.loc[:, "%"] * 100)
     # total.loc[:, "Population"] = total["Population"].map('{:,d}'.format)
@@ -424,7 +424,7 @@ def region(latest_daily_date, latest_weekly_date):
 def by_ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Lower Tier Local Authority")    
 
-    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%d-%B-%Y')}.xlsx"
     vaccinations = sdt.vaccinations_dataframe(spreadsheet)    
     population = sdt.population_dataframe(spreadsheet)    
     combined = dt.compute_all_vaccination_rates(vaccinations, population)
@@ -486,7 +486,7 @@ def by_ltla(latest_daily_date, latest_weekly_date):
 def my_ltla(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by selected Lower Tier Local Authorities")    
 
-    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%d-%B-%Y')}.xlsx"
     
     vaccinations = sdt.vaccinations_dataframe(spreadsheet)    
     population = sdt.population_dataframe(spreadsheet)    
@@ -591,8 +591,8 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-06-01")
-latest_weekly_date = parser.parse("2021-05-27")
+latest_daily_date = parser.parse("2021-06-05")
+latest_weekly_date = parser.parse("2021-06-03")
 page(latest_daily_date, latest_weekly_date)
 
 st.markdown(f"""- - -
