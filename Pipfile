@@ -18,6 +18,7 @@ seaborn = "*"
 selenium = "*"
 vega-datasets = "*"
 bs4 = "*"
+plotly = "*"
 
 [requires]
 python_version = "3.8"

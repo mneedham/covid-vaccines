@@ -1,4 +1,5 @@
 import streamlit as st
+import plotly.express as px
 
 import pandas as pd
 import altair as alt
@@ -188,6 +189,8 @@ def weekly(latest_daily_date, latest_weekly_date):
         ).properties( title='Doses by day of week', height=500)
         st.altair_chart(weekday_doses_chart, use_container_width=True)    
 
+
+
 def overview(latest_daily_date, latest_weekly_date):    
     all_df = sdt.create_vaccines_dataframe(latest_daily_date)
 
@@ -200,6 +203,7 @@ def overview(latest_daily_date, latest_weekly_date):
     })
     summary_df.set_index('Description', inplace=True)
 
+    
     st.title("All Vaccines Administered")
 
     
@@ -215,6 +219,10 @@ def overview(latest_daily_date, latest_weekly_date):
 
         melted_cumulative_doses = melted_df.loc[(melted_df["dose"] == "firstDoseCumulative") | (melted_df["dose"] == "secondDoseCumulative"), :]
         melted_cumulative_doses.loc[:,"dateWeek"] = pd.to_datetime(melted_cumulative_doses.date).dt.strftime('%Y-%U')
+
+        # df = px.data.gapminder().query("country=='Canada'")
+        # fig = px.line(melted_cumulative_doses, x="date", y="vaccinations", color='dose', title='Life expectancy in Canada')
+        # st.plotly_chart(fig, use_container_width=True)
 
         cumulative_first_doses_chart = alt.Chart(melted_cumulative_doses, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).mark_line(point=True).encode(
             x=alt.X('dateWeek', axis=alt.Axis(title='Week Ending'), scale=alt.Scale(padding=0)),
@@ -299,7 +307,7 @@ def ethnicity(latest_daily_date, latest_weekly_date):
 
     ethnicities = pd.read_csv("data/ethnicities.csv")
 
-    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%d-%B-%Y')}.xlsx"
     vaccinations = sdt.vaccinations_dataframe(spreadsheet)
     population = sdt.population_dataframe(spreadsheet)
     combined = dt.compute_all_vaccination_rates(vaccinations, population)
@@ -381,7 +389,7 @@ def ethnicity(latest_daily_date, latest_weekly_date):
 def region(latest_daily_date, latest_weekly_date):
     st.title("Vaccines Administered by Region")
 
-    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%-d-%B-%Y')}.xlsx"
+    spreadsheet = f"data/COVID-19-weekly-announced-vaccinations-{latest_weekly_date.strftime('%d-%B-%Y')}.xlsx"
     
     vaccinations = sdt.vaccinations_dataframe(spreadsheet)
     population = sdt.population_dataframe(spreadsheet)
@@ -448,7 +456,7 @@ def by_ltla(latest_daily_date, latest_weekly_date):
         # st.write(population_with_regions)
         chart = alt.Chart(population_with_regions, padding={"left": 10, "top": 10, "right": 10, "bottom": 10}).transform_aggregate(
             sum_overall='sum(Overall)',
-            sum_under_45='sum(Under 40)',
+            sum_under_45='sum(Under 30)',
             groupby=['Region Name (administrative)']
         ).transform_calculate(
             under45s='100 * (datum.sum_under_45 / datum.sum_overall)'
@@ -591,7 +599,7 @@ selection = st.sidebar.radio("Select Dashboard", radio_list)
 page = PAGES[selection]
 
 population = 68134973
-latest_daily_date = parser.parse("2021-06-05")
+latest_daily_date = parser.parse("2021-06-19")
 latest_weekly_date = parser.parse("2021-06-03")
 page(latest_daily_date, latest_weekly_date)
 
